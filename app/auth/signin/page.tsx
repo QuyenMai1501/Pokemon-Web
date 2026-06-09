@@ -3,6 +3,7 @@
 
 import { signIn } from "next-auth/react";
 import { useState } from "react";
+import Link from "next/link"; // Thêm dòng này
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
@@ -67,9 +68,13 @@ export default function SignInPage() {
           </button>
         </form>
 
-        <p className="text-center text-gray-400 mt-6 text-sm">
-          Chức năng đăng ký sẽ được làm sau
-        </p>
+        {/* Cập nhật phần này */}
+        <div className="text-center mt-6">
+          <span className="text-gray-400 text-sm">Chưa có tài khoản? </span>
+          <Link href="/auth/register" className="text-blue-500 hover:text-blue-400 text-sm font-semibold transition">
+            Đăng ký ngay
+          </Link>
+        </div>
       </div>
     </div>
   );
