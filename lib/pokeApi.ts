@@ -33,3 +33,9 @@ export async function getPokemonSpecies(nameOrId: string | number) {
     const res = await fetch(`${BASE_URL}/pokemon-species/${nameOrId}`);
     return res.json();
 }
+
+export async function getEvolutionChain(chainUrl: string) {
+    const res = await fetch(chainUrl, { next: { revalidate: 3600 } });
+    if (!res.ok) return null;
+    return res.json();
+}
