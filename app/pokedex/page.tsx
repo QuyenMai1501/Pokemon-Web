@@ -1,12 +1,11 @@
 // app/pokedex/page.tsx
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { getPokemonList } from '@/lib/pokeApi';
-import SearchBar from '@/components/pokemon/SearchBar';
-import TypeBadge from '@/components/pokemon/TypeBadge';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { getPokemonList } from "@/lib/pokeApi";
+import SearchBar from "@/components/pokemon/SearchBar";
 
 interface PokemonSimple {
   name: string;
@@ -30,8 +29,8 @@ export default function PokedexPage() {
   }, []);
 
   useEffect(() => {
-    const filtered = pokemonList.filter(p => 
-      p.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const filtered = pokemonList.filter((p) =>
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
     setFilteredList(filtered);
   }, [searchTerm, pokemonList]);
@@ -39,7 +38,9 @@ export default function PokedexPage() {
   return (
     <div className="min-h-screen bg-gray-950 text-white p-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-5xl font-bold text-red-500 text-center mb-8">Pokédex</h1>
+        <h1 className="text-5xl font-bold text-red-500 text-center mb-8">
+          Pokédex
+        </h1>
 
         <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
@@ -48,9 +49,12 @@ export default function PokedexPage() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
             {filteredList.map((pokemon) => {
-              const id = pokemon.url.split('/').filter(Boolean).pop();
+              const id = pokemon.url.split("/").filter(Boolean).pop();
               return (
-                <Link href={`/pokedex/${id}`} key={pokemon.name} className="group">
+                <Link
+                  href={`/pokedex/${id}`}
+                  key={pokemon.name}
+                  className="group">
                   <div className="bg-gray-900 rounded-2xl p-6 hover:bg-gray-800 transition-all border border-gray-800 hover:border-red-500 h-full flex flex-col items-center">
                     <div className="relative w-32 h-32 mb-4">
                       <Image
@@ -58,9 +62,12 @@ export default function PokedexPage() {
                         alt={pokemon.name}
                         fill
                         className="object-contain group-hover:scale-110 transition-transform"
+                        sizes="(max-width: 768px) 100px, 128px"
                       />
                     </div>
-                    <p className="text-xl font-semibold capitalize">#{id?.padStart(3, '0')} {pokemon.name}</p>
+                    <p className="text-xl font-semibold capitalize">
+                      #{id?.padStart(3, "0")} {pokemon.name}
+                    </p>
                     {/* Thêm TypeBadge sau */}
                   </div>
                 </Link>
