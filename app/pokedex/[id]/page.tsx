@@ -1,7 +1,8 @@
-// app/pokedex/[id]/page.tsx
 import Image from "next/image";
 import Link from "next/link";
 import TypeBadge from "@/components/pokemon/TypeBadge";
+import EvolutionChain from "@/components/pokemon/EvolutionChain";
+import StatBar from "@/components/pokemon/StatBar";
 import {
   getPokemonDetail,
   getPokemonSpecies,
@@ -59,22 +60,19 @@ export default async function PokemonDetailPage({ params }: Props) {
       .replace("special-defense", "Sp. Def")
       .replace("speed", "Speed"),
     value: stat.base_stat,
-    max: 255,
   }));
 
-  // Hàm lấy tên evolution chain
-  const getEvolutionNames = (chain: any): string[] => {
-    const names: string[] = [];
-    let current = chain?.chain;
-
-    while (current) {
-      names.push(current.species.name);
-      current = current.evolves_to?.[0];
-    }
-    return names;
-  };
-
-  const evolutionNames = evolutionData ? getEvolutionNames(evolutionData) : [];
+  const evolutionNames = evolutionData
+    ? (() => {
+        const names: string[] = [];
+        let current = evolutionData.chain;
+        while (current) {
+          names.push(current.species.name);
+          current = current.evolves_to?.[0];
+        }
+        return names;
+      })()
+    : [];
 
   return (
     <div className="min-h-screen bg-gray-950 text-white pb-12">
@@ -86,7 +84,7 @@ export default async function PokemonDetailPage({ params }: Props) {
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {/* Phần trái: Hình ảnh */}
+          {/* Phần hình ảnh */}
           <div className="flex flex-col items-center">
             <div className="relative w-80 h-80 mb-8">
               <Image
@@ -98,6 +96,7 @@ export default async function PokemonDetailPage({ params }: Props) {
                 fill
                 className="object-contain drop-shadow-2xl"
                 priority
+                sizes="(max-width: 768px) 300px, 400px"
               />
             </div>
 
@@ -116,9 +115,8 @@ export default async function PokemonDetailPage({ params }: Props) {
             </div>
           </div>
 
-          {/* Phần phải: Thông tin */}
+          {/* Phần thông tin */}
           <div className="space-y-10">
-            {/* Mô tả */}
             <div>
               <h3 className="text-2xl font-semibold mb-3">Mô tả</h3>
               <p className="text-gray-300 leading-relaxed text-lg">
@@ -126,56 +124,19 @@ export default async function PokemonDetailPage({ params }: Props) {
               </p>
             </div>
 
-            {/* Evolution Chain */}
             {evolutionNames.length > 1 && (
-              <div>
-                <h3 className="text-2xl font-semibold mb-4">Chuỗi Tiến Hóa</h3>
-                <div className="flex flex-wrap items-center gap-4 bg-gray-900 p-6 rounded-2xl">
-                  {evolutionNames.map((name, index) => (
-                    <div key={index} className="flex items-center gap-3">
-                      <Link
-                        href={`/pokedex/${name}`}
-                        className="group flex flex-col items-center hover:scale-105 transition-transform">
-                        <div className="relative w-20 h-20 bg-gray-800 rounded-2xl overflow-hidden">
-                          <Image
-                            src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${name}.png`}
-                            alt={name}
-                            fill
-                            className="object-contain p-2"
-                          />
-                        </div>
-                        <p className="text-sm capitalize mt-2 text-gray-300 group-hover:text-white">
-                          {name}
-                        </p>
-                      </Link>
-                      {index < evolutionNames.length - 1 && (
-                        <span className="text-3xl text-gray-600">→</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <EvolutionChain evolutionNames={evolutionNames} />
             )}
 
-            {/* Stats, Physical, Abilities giữ nguyên */}
             <div>
               <h3 className="text-2xl font-semibold mb-5">Chỉ số cơ bản</h3>
               <div className="space-y-4">
                 {stats.map((stat: any) => (
-                  <div key={stat.name} className="flex items-center gap-4">
-                    <div className="w-24 text-right font-medium text-gray-400">
-                      {stat.name}
-                    </div>
-                    <div className="flex-1 bg-gray-800 h-3 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-red-500 transition-all duration-700"
-                        style={{ width: `${(stat.value / stat.max) * 100}%` }}
-                      />
-                    </div>
-                    <div className="w-12 font-mono text-right font-semibold">
-                      {stat.value}
-                    </div>
-                  </div>
+                  <StatBar
+                    key={stat.name}
+                    name={stat.name}
+                    value={stat.value}
+                  />
                 ))}
               </div>
             </div>
