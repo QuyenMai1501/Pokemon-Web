@@ -62,22 +62,32 @@ export default async function PokemonDetailPage({ params }: Props) {
     value: stat.base_stat,
   }));
 
-  // Xử lý Evolution Chain
+  // === EVOLUTION CHAIN - ĐÃ FIX ID ===
   const evolutionNames: string[] = [];
   const evolutionIds: number[] = [];
 
   if (evolutionData?.chain) {
     let current = evolutionData.chain;
-    while (current) {
-      evolutionNames.push(current.species.name);
 
-      // Lấy ID từ URL species
+    while (current) {
+      const name = current.species.name;
+      evolutionNames.push(name);
+
+      // Cách 1: Lấy ID từ URL species
       const speciesUrl = current.species.url;
-      const idMatch = speciesUrl.match(/pokemon\/(\d+)\//);
-      if (idMatch) {
+      const idMatch = speciesUrl.match(/\/pokemon\/(\d+)\//);
+
+      if (idMatch && idMatch[1]) {
         evolutionIds.push(parseInt(idMatch[1]));
       } else {
-        evolutionIds.push(0); // fallback
+        // Cách 2: Fallback dùng tên để tìm ID (gọi API nhỏ)
+        try {
+          const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
+          const data = await res.json();
+          evolutionIds.push(data.id);
+        } catch {
+          evolutionIds.push(0);
+        }
       }
 
       current = current.evolves_to?.[0];
