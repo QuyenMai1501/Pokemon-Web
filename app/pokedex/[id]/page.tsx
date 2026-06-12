@@ -3,6 +3,7 @@ import Link from "next/link";
 import TypeBadge from "@/components/pokemon/TypeBadge";
 import EvolutionChain from "@/components/pokemon/EvolutionChain";
 import StatBar from "@/components/pokemon/StatBar";
+import MovesList from '@/components/pokemon/MovesList';
 import {
   getPokemonDetail,
   getPokemonSpecies,
@@ -39,6 +40,8 @@ export default async function PokemonDetailPage({ params }: Props) {
       </div>
     );
   }
+
+  const moves = pokemon.moves || [];
 
   const flavorText =
     species.flavor_text_entries
@@ -197,6 +200,7 @@ export default async function PokemonDetailPage({ params }: Props) {
               </div>
             </div>
           </div>
+          <MovesList moves={moves} />
         </div>
       </div>
     </div>

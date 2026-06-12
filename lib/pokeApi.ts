@@ -14,6 +14,7 @@ export interface Pokemon {
     height: number;
     weight: number;
     abilities: Array<{ ability: { name: string } }>
+    moves: Array<{ move: { name: string; url: string }; version_group_details: any[] }>;
 }
 
 export async function getPokemonList(limit = 151, offset = 0) {
@@ -38,4 +39,12 @@ export async function getEvolutionChain(chainUrl: string) {
     const res = await fetch(chainUrl, { next: { revalidate: 3600 } });
     if (!res.ok) return null;
     return res.json();
+}
+
+export async function getPokemonMoves(id: string) {
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
+        next: { revalidate: 3600 }
+    });
+    const data = await res.json();
+    return data.moves;
 }
