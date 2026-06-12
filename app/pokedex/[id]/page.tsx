@@ -200,7 +200,7 @@ export default async function PokemonDetailPage({ params }: Props) {
               </div>
             </div>
           </div>
-          <MovesList moves={moves} />
+          <MovesList pokemonMoves={pokemon.moves} />
         </div>
       </div>
     </div>

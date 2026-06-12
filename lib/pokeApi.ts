@@ -48,3 +48,15 @@ export async function getPokemonMoves(id: string) {
     const data = await res.json();
     return data.moves;
 }
+
+export async function getMoveDetail(moveUrl: string) {
+    try {
+        const res = await fetch(moveUrl, {
+            next: {revalidate: 3600}
+        });
+        if (!res.ok) return null;
+        return res.json();
+    } catch {
+        return null
+    }
+}
