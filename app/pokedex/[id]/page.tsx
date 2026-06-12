@@ -62,17 +62,27 @@ export default async function PokemonDetailPage({ params }: Props) {
     value: stat.base_stat,
   }));
 
-  const evolutionNames = evolutionData
-    ? (() => {
-        const names: string[] = [];
-        let current = evolutionData.chain;
-        while (current) {
-          names.push(current.species.name);
-          current = current.evolves_to?.[0];
-        }
-        return names;
-      })()
-    : [];
+  // Xử lý Evolution Chain
+  const evolutionNames: string[] = [];
+  const evolutionIds: number[] = [];
+
+  if (evolutionData?.chain) {
+    let current = evolutionData.chain;
+    while (current) {
+      evolutionNames.push(current.species.name);
+
+      // Lấy ID từ URL species
+      const speciesUrl = current.species.url;
+      const idMatch = speciesUrl.match(/pokemon\/(\d+)\//);
+      if (idMatch) {
+        evolutionIds.push(parseInt(idMatch[1]));
+      } else {
+        evolutionIds.push(0); // fallback
+      }
+
+      current = current.evolves_to?.[0];
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 text-white pb-12">
@@ -125,7 +135,10 @@ export default async function PokemonDetailPage({ params }: Props) {
             </div>
 
             {evolutionNames.length > 1 && (
-              <EvolutionChain evolutionNames={evolutionNames} />
+              <EvolutionChain
+                evolutionNames={evolutionNames}
+                evolutionIds={evolutionIds}
+              />
             )}
 
             <div>
