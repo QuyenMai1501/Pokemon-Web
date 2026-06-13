@@ -3,7 +3,7 @@ import Link from "next/link";
 import TypeBadge from "@/components/pokemon/TypeBadge";
 import EvolutionChain from "@/components/pokemon/EvolutionChain";
 import StatBar from "@/components/pokemon/StatBar";
-import MovesList from '@/components/pokemon/MovesList';
+import MovesList from "@/components/pokemon/MovesList";
 import {
   getPokemonDetail,
   getPokemonSpecies,
@@ -200,8 +200,8 @@ export default async function PokemonDetailPage({ params }: Props) {
               </div>
             </div>
           </div>
-          <MovesList pokemonMoves={pokemon.moves} />
         </div>
+        <MovesList pokemonMoves={pokemon.moves} />
       </div>
     </div>
   );
