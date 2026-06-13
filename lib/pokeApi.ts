@@ -52,11 +52,30 @@ export async function getPokemonMoves(id: string) {
 export async function getMoveDetail(moveUrl: string) {
     try {
         const res = await fetch(moveUrl, {
-            next: {revalidate: 3600}
+            next: { revalidate: 3600 }
         });
         if (!res.ok) return null;
         return res.json();
     } catch {
         return null
     }
+}
+
+export async function getTypeDeffense(types: string[]) {
+    const damageRelattions: any = {};
+
+    for (const typeName of types) {
+        const res = await fetch(`https://pokeapi.co/api/v2/type/${typeName}`, {
+            next: { revalidate: 3600 }
+        });
+        const data = await res.json();
+
+        damageRelattions[typeName] = {
+            doubleDamgeFrom: data.damage_relations.double_damage_from.map((t: any) => t.name),
+            halfDamageFrom: data.damage_relations.half_damage_from.map((t: any) => t.name),
+            noDamageFrom: data.damage_relations.no_damage_from.map((t: any) => t.name),
+        };
+    }
+
+    return damageRelattions;
 }
