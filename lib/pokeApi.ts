@@ -61,21 +61,27 @@ export async function getMoveDetail(moveUrl: string) {
     }
 }
 
-export async function getTypeDeffense(types: string[]) {
-    const damageRelattions: any = {};
+export async function getTypeDefense(types: string[]) {
+  const damageRelations: any = {};
 
-    for (const typeName of types) {
-        const res = await fetch(`https://pokeapi.co/api/v2/type/${typeName}`, {
-            next: { revalidate: 3600 }
-        });
-        const data = await res.json();
+  for (const typeName of types) {
+    try {
+      const res = await fetch(`https://pokeapi.co/api/v2/type/${typeName}`, {
+        next: { revalidate: 3600 }
+      });
+      if (!res.ok) continue;
 
-        damageRelattions[typeName] = {
-            doubleDamgeFrom: data.damage_relations.double_damage_from.map((t: any) => t.name),
-            halfDamageFrom: data.damage_relations.half_damage_from.map((t: any) => t.name),
-            noDamageFrom: data.damage_relations.no_damage_from.map((t: any) => t.name),
-        };
+      const data = await res.json();
+
+      damageRelations[typeName] = {
+        doubleDamageFrom: data.damage_relations.double_damage_from.map((t: any) => t.name),
+        halfDamageFrom: data.damage_relations.half_damage_from.map((t: any) => t.name),
+        noDamageFrom: data.damage_relations.no_damage_from.map((t: any) => t.name),
+      };
+    } catch (e) {
+      console.error(`Failed to load type relations for ${typeName}`);
     }
+  }
 
-    return damageRelattions;
+  return damageRelations;
 }

@@ -25,7 +25,7 @@ export default function TypeDefense({ types, damageRelations }: TypeDefenseProps
   const allTypes = Object.keys(typeShortNames);
 
   const getMultiplier = (attackType: string): number => {
-    let multiplier = 1;
+    let multiplier = 1.0;
 
     types.forEach((defType) => {
       const typeName = defType.type.name;
@@ -33,9 +33,8 @@ export default function TypeDefense({ types, damageRelations }: TypeDefenseProps
 
       if (!relations) return;
 
-      // Tính multiplier cho từng hệ phòng thủ
       if (relations.noDamageFrom?.includes(attackType)) {
-        multiplier *= 0;
+        multiplier = 0;
       } else if (relations.halfDamageFrom?.includes(attackType)) {
         multiplier *= 0.5;
       } else if (relations.doubleDamageFrom?.includes(attackType)) {
@@ -43,22 +42,25 @@ export default function TypeDefense({ types, damageRelations }: TypeDefenseProps
       }
     });
 
-    return multiplier;
+    // Đảm bảo không bị float lạ
+    return Math.round(multiplier * 4) / 4; // 0, 0.25, 0.5, 1, 2, 4
   };
 
   const getDisplayValue = (multi: number) => {
-    if (multi === 0) return '0';
-    if (multi === 0.25) return '¼';
-    if (multi === 0.5) return '½';
-    if (multi === 2) return '2';
-    if (multi === 4) return '4';
-    return '1';
+    if (multi === 0) return '0x';
+    if (multi === 0.25) return '¼x';
+    if (multi === 0.5) return '½x';
+    if (multi === 2) return '2x';
+    if (multi === 4) return '4x';
+    return '1x';
   };
 
   const getBgColor = (multi: number) => {
-    if (multi === 0) return 'bg-gray-700 text-gray-400';
-    if (multi < 1) return 'bg-green-500/20 text-green-400 border border-green-500/30';
-    if (multi > 1) return 'bg-red-500/20 text-red-400 border border-red-500/30';
+    if (multi === 0) return 'bg-black text-gray-400';
+    if (multi < 1) return 'bg-red-500/20 text-red-400';
+    if (multi < 1/2) return 'bg-red-700/20 text-red-600'
+    if (multi > 1) return 'bg-green-500/20 text-green-400';
+    if (multi > 2) return 'bg-green-700/20 text-green-600'
     return 'bg-gray-800 text-gray-300';
   };
 
@@ -81,7 +83,7 @@ export default function TypeDefense({ types, damageRelations }: TypeDefenseProps
                 <div className={`w-11 h-11 ${colorClass} text-white text-xs font-bold rounded-2xl flex items-center justify-center shadow-md mb-3`}>
                   {typeShortNames[type]}
                 </div>
-                <div className={`text-base font-bold px-5 py-2.5 rounded-2xl border ${getBgColor(multiplier)}`}>
+                <div className={`text-base font-bold px-5 py-2.5 rounded-2xl ${getBgColor(multiplier)}`}>
                   {display}
                 </div>
               </div>

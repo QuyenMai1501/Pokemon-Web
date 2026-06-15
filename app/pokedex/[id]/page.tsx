@@ -8,7 +8,7 @@ import {
   getPokemonDetail,
   getPokemonSpecies,
   getEvolutionChain,
-  getTypeDeffense,
+  getTypeDefense,
 } from "@/lib/pokeApi";
 import TypeDefense from "@/components/pokemon/TypeDefense";
 
@@ -44,7 +44,7 @@ export default async function PokemonDetailPage({ params }: Props) {
   }
 
   const moves = pokemon.moves || [];
-  const damageRelations = await getTypeDeffense(
+  const damageRelations = await getTypeDefense(
     pokemon.types.map((t: any) => t.type.name),
   );
 
