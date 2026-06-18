@@ -9,8 +9,10 @@ import {
   getPokemonSpecies,
   getEvolutionChain,
   getTypeDefense,
+  getAbilityDetail,
 } from "@/lib/pokeApi";
 import TypeDefense from "@/components/pokemon/TypeDefense";
+import AbilityTooltip from "@/components/pokemon/AbilityTooltip";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -48,13 +50,16 @@ export default async function PokemonDetailPage({ params }: Props) {
     pokemon.types.map((t: any) => t.type.name),
   );
 
+  const flavorTextEntry =
+    species.flavor_text_entries?.find(
+      (entry: any) => entry.language.name === "vi",
+    ) ||
+    species.flavor_text_entries?.find(
+      (entry: any) => entry.language.name === "en",
+    );
+
   const flavorText =
-    species.flavor_text_entries
-      ?.find(
-        (entry: any) =>
-          entry.language.name === "vi" || entry.language.name === "en",
-      )
-      ?.flavor_text?.replace(/\f/g, " ") || "Không có mô tả.";
+    flavorTextEntry?.flavor_text?.replace(/\f/g, " ") || "Không có mô tả";
 
   const genus =
     species.genera?.find((g: any) => g.language.name === "en")?.genus || "";
@@ -101,6 +106,21 @@ export default async function PokemonDetailPage({ params }: Props) {
       current = current.evolves_to?.[0];
     }
   }
+
+  const abilitiesWithDesc = await Promise.all(
+    pokemon.abilities.map(async (ab: any) => {
+      const detail = await getAbilityDetail(ab.ability.url);
+      const effectEntry =
+        detail.effect_entries?.find((e: any) => e.language.name === "vi") ||
+        detail.effect_entries?.find((e: any) => e.language.name === "en");
+
+      return {
+        name: ab.ability.name,
+        isHidden: ab.is_hidden,
+        effect: effectEntry?.short_effect || "Không có mô tả.",
+      };
+    }),
+  );
 
   return (
     <div className="min-h-screen bg-gray-950 text-white pb-12">
@@ -190,17 +210,13 @@ export default async function PokemonDetailPage({ params }: Props) {
             <div>
               <h3 className="text-2xl font-semibold mb-4">Abilities</h3>
               <div className="flex flex-wrap gap-3">
-                {pokemon.abilities.map((ab: any, index: number) => (
-                  <div
+                {abilitiesWithDesc.map((ab, index) => (
+                  <AbilityTooltip
                     key={index}
-                    className="bg-gray-900 px-6 py-3 rounded-xl capitalize border border-gray-700">
-                    {ab.ability.name.replace("-", " ")}
-                    {ab.is_hidden && (
-                      <span className="text-xs text-gray-500 ml-2">
-                        (Hidden)
-                      </span>
-                    )}
-                  </div>
+                    name={ab.name}
+                    effect={ab.effect}
+                    isHidden={ab.isHidden}
+                  />
                 ))}
               </div>
             </div>

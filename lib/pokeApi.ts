@@ -1,3 +1,5 @@
+import { relative } from "path";
+
 const BASE_URL = 'https://pokeapi.co/api/v2';
 
 export interface Pokemon {
@@ -30,8 +32,10 @@ export async function getPokemonDetail(nameOrId: string | number): Promise<Pokem
     return res.json();
 }
 
-export async function getPokemonSpecies(nameOrId: string | number) {
-    const res = await fetch(`${BASE_URL}/pokemon-species/${nameOrId}`);
+export async function getPokemonSpecies(id: string | number) {
+    const res = await fetch(`${BASE_URL}/pokemon-species/${id}`, {
+        next: { revalidate: 3600 }
+    });
     return res.json();
 }
 
@@ -62,26 +66,32 @@ export async function getMoveDetail(moveUrl: string) {
 }
 
 export async function getTypeDefense(types: string[]) {
-  const damageRelations: any = {};
+    const damageRelations: any = {};
 
-  for (const typeName of types) {
-    try {
-      const res = await fetch(`https://pokeapi.co/api/v2/type/${typeName}`, {
-        next: { revalidate: 3600 }
-      });
-      if (!res.ok) continue;
+    for (const typeName of types) {
+        try {
+            const res = await fetch(`https://pokeapi.co/api/v2/type/${typeName}`, {
+                next: { revalidate: 3600 }
+            });
+            if (!res.ok) continue;
 
-      const data = await res.json();
+            const data = await res.json();
 
-      damageRelations[typeName] = {
-        doubleDamageFrom: data.damage_relations.double_damage_from.map((t: any) => t.name),
-        halfDamageFrom: data.damage_relations.half_damage_from.map((t: any) => t.name),
-        noDamageFrom: data.damage_relations.no_damage_from.map((t: any) => t.name),
-      };
-    } catch (e) {
-      console.error(`Failed to load type relations for ${typeName}`);
+            damageRelations[typeName] = {
+                doubleDamageFrom: data.damage_relations.double_damage_from.map((t: any) => t.name),
+                halfDamageFrom: data.damage_relations.half_damage_from.map((t: any) => t.name),
+                noDamageFrom: data.damage_relations.no_damage_from.map((t: any) => t.name),
+            };
+        } catch (e) {
+            console.error(`Failed to load type relations for ${typeName}`);
+        }
     }
-  }
 
-  return damageRelations;
+    return damageRelations;
+}
+
+export async function getAbilityDetail(abilityUrl: string) {
+    const res = await fetch(abilityUrl, {next: {revalidate: 3600}});
+    if (!res.ok) return null;
+    return res.json();
 }
