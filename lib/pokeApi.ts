@@ -99,3 +99,13 @@ export async function getAbilityDetail(abilityUrl: string) {
 }
 
 export const getAbilityDetailCached = cache(getAbilityDetail);
+
+export async function getItemDetail(url: string) {
+  try {
+    const res = await fetch(url, { next: { revalidate: 86400 } });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}

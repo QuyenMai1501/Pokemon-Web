@@ -8,6 +8,7 @@ import styles from "./Navbar.module.css";
 const navLinks = [
   { href: "/", label: "Trang chủ" },
   { href: "/pokedex", label: "Pokédex" },
+  { href: "/items", label: "Vật phẩm" },
   { href: "/team-builder", label: "Xây Team" },
   { href: "/battle", label: "Đấu trường" },
 ];
