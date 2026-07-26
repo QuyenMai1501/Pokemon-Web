@@ -2,7 +2,7 @@
 
 import styles from "./TypeBadge.module.css";
 
-const typeColors: Record<string, string> = {
+export const typeColors: Record<string, string> = {
   normal: "#9ca3af", fire: "#ef4444", water: "#3b82f6", grass: "#22c55e",
   electric: "#eab308", ice: "#67e8f9", fighting: "#c2410c", poison: "#9333ea",
   ground: "#b45309", flying: "#7dd3fc", psychic: "#ec4899", bug: "#65a30d",

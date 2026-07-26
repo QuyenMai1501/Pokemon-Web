@@ -95,7 +95,7 @@
   gap: 2rem;
 }
 
-.infoCard {
+.section {
   background: #fff;
   border-radius: 1rem;
   padding: 1.5rem;
@@ -115,21 +115,6 @@
   line-height: 1.625;
 }
 
-.statsSection {
-  background: #fff;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1);
-  border: 1px solid #f3f4f6;
-}
-
-.statsTitle {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #111827;
-  margin-bottom: 1.25rem;
-}
-
 .statsList {
   display: flex;
   flex-direction: column;
@@ -140,14 +125,6 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
-}
-
-.statCard {
-  background: #fff;
-  border-radius: 1rem;
-  padding: 1.25rem;
-  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1);
-  border: 1px solid #f3f4f6;
 }
 
 .statLabel {
@@ -162,31 +139,8 @@
   margin-top: 0.25rem;
 }
 
-.abilitiesSection {
-  background: #fff;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1);
-  border: 1px solid #f3f4f6;
-}
-
-.abilitiesTitle {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #111827;
-  margin-bottom: 1rem;
-}
-
 .abilitiesList {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-}
-
-.typeDefenseSection {
-  background: #fff;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1);
-  border: 1px solid #f3f4f6;
 }

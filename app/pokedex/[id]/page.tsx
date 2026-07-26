@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import TypeBadge from "@/components/pokemon/TypeBadge";
 import EvolutionChain from "@/components/pokemon/EvolutionChain";
 import StatBar from "@/components/pokemon/StatBar";
@@ -19,19 +20,38 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+
+  try {
+    const pokemon = await getPokemonDetail(id);
+    return {
+      title: `#${pokemon.id.toString().padStart(3, "0")} ${pokemon.name} — Pokédex`,
+      description: `Thông tin chi tiết về Pokémon ${pokemon.name}`,
+    };
+  } catch {
+    return { title: "Pokémon không tồn tại — Pokédex" };
+  }
+}
+
 export default async function PokemonDetailPage({ params }: Props) {
   const { id } = await params;
 
-  let pokemon, species, evolutionData;
+  let pokemon, species, evolutionData, damageRelations;
 
   try {
-    pokemon = await getPokemonDetail(id);
-    species = await getPokemonSpecies(id);
+    [pokemon, species] = await Promise.all([
+      getPokemonDetail(id),
+      getPokemonSpecies(id),
+    ]);
 
-    if (species.evolution_chain?.url) {
-      evolutionData = await getEvolutionChain(species.evolution_chain.url);
-    }
-  } catch (error) {
+    [evolutionData, damageRelations] = await Promise.all([
+      species.evolution_chain?.url
+        ? getEvolutionChain(species.evolution_chain.url)
+        : Promise.resolve(null),
+      getTypeDefense(pokemon.types.map((t: any) => t.type.name)),
+    ]);
+  } catch {
     return (
       <div className={styles.page}>
         <div className={styles.inner}>
@@ -45,11 +65,6 @@ export default async function PokemonDetailPage({ params }: Props) {
       </div>
     );
   }
-
-  const moves = pokemon.moves || [];
-  const damageRelations = await getTypeDefense(
-    pokemon.types.map((t: any) => t.type.name),
-  );
 
   const flavorTextEntry =
     species.flavor_text_entries?.find(
@@ -157,7 +172,7 @@ export default async function PokemonDetailPage({ params }: Props) {
           </div>
 
           <div className={styles.infoSection}>
-            <div className={styles.infoCard}>
+            <div className={styles.section}>
               <h3 className={styles.sectionTitle}>Mô tả</h3>
               <p className={styles.description}>{flavorText}</p>
             </div>
@@ -169,8 +184,8 @@ export default async function PokemonDetailPage({ params }: Props) {
               />
             )}
 
-            <div className={styles.statsSection}>
-              <h3 className={styles.statsTitle}>Chỉ số cơ bản</h3>
+            <div className={styles.section}>
+              <h3 className={styles.sectionTitle}>Chỉ số cơ bản</h3>
               <div className={styles.statsList}>
                 {stats.map((stat: any) => (
                   <StatBar
@@ -183,18 +198,18 @@ export default async function PokemonDetailPage({ params }: Props) {
             </div>
 
             <div className={styles.statGrid}>
-              <div className={styles.statCard}>
+              <div className={styles.section}>
                 <p className={styles.statLabel}>Chiều cao</p>
                 <p className={styles.statValue}>{pokemon.height / 10} m</p>
               </div>
-              <div className={styles.statCard}>
+              <div className={styles.section}>
                 <p className={styles.statLabel}>Cân nặng</p>
                 <p className={styles.statValue}>{pokemon.weight / 10} kg</p>
               </div>
             </div>
 
-            <div className={styles.abilitiesSection}>
-              <h3 className={styles.abilitiesTitle}>Abilities</h3>
+            <div className={styles.section}>
+              <h3 className={styles.sectionTitle}>Abilities</h3>
               <div className={styles.abilitiesList}>
                 {abilitiesWithDesc.map((ab, index) => (
                   <AbilityTooltip
@@ -207,7 +222,7 @@ export default async function PokemonDetailPage({ params }: Props) {
               </div>
             </div>
 
-            <div className={styles.typeDefenseSection}>
+            <div className={styles.section}>
               <TypeDefense
                 types={pokemon.types}
                 damageRelations={damageRelations}
