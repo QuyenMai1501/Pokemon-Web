@@ -20,12 +20,27 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - **Turbopack** is the default build tool.
 - **`next lint` removed** — ESLint is invoked directly; typecheck is separate.
 
+## List loading strategies
+
+### Pokédex grid (`app/pokedex/page.tsx`)
+- **Mechanism**: Infinite scroll via IntersectionObserver
+- **Page size**: `PAGE_SIZE = 40` (initial load + scroll increment)
+- **Data**: Client → POST `/api/pokedex/batch` → server fetches from PokeAPI with `CONCURRENCY = 15`
+- **Search**: Filters `allPokemon` array locally by name/id instantly → only fetches details for matching IDs via `effectiveIds` — avoids 150+ PokeAPI calls
+- **Optimizations applied**: concurrency limiter (15), local search filter, PAGE_SIZE=40, cache TTL=86400
+
+### Moves list (`components/pokemon/MovesList.tsx`)
+- **Mechanism**: "Xem thêm" button, incremental batch
+- **Batch size**: `BATCH_SIZE = 10`
+- **Data**: Client → `getMoveDetail(url)` direct to PokeAPI (sequential within batch)
+- **Optimization needed**: fetch moves in parallel within each batch
+
 ## Key conventions
 
 - **Path alias**: `@/*` → project root.
 - **Auth**: NextAuth v5 beta, credentials-only, JWT sessions. Exports from `auth.ts`: `{ handlers, signIn, signOut, auth }`. Route handler at `app/api/auth/[...nextauth]/route.ts`.
 - **DB**: Prisma 7 + MariaDB adapter. Schema at `prisma/schema.prisma`. Connection URL from `DATABASE_URL` env var. Singleton client in `lib/db.ts`.
-- **External API**: PokéAPI v2 via `lib/pokeApi.ts`. Uses `next: { revalidate: 3600 }` for fetch caching (86400 for abilities).
+- **External API**: PokéAPI v2 via `lib/pokeApi.ts`. Uses `next: { revalidate: 86400 }` for fetch caching.
 - **Translations**: Vietnamese UI. PokéAPI Vietnamese entries used when available, otherwise English fallback.
 - **Styling**: Tailwind v4 — `@import "tailwindcss"` in `globals.css`, `@theme inline` for design tokens.
 - **Implemented API routes**: `app/api/register` (signup), `app/api/test-db` (healthcheck), `app/api/pokedex/batch` (batch detail fetch), `app/api/pokedex/abilities/batch`.

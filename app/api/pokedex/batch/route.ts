@@ -1,11 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPokemonDetail } from "@/lib/pokeApi";
 
+const CONCURRENCY = 15;
+
 interface PokemonBatch {
   id: number;
   name: string;
   types: Array<{ type: { name: string } }>;
   sprite: string;
+}
+
+async function withConcurrency<T, R>(
+  items: T[],
+  fn: (item: T) => Promise<R>,
+  concurrency: number,
+): Promise<PromiseSettledResult<R>[]> {
+  const results: PromiseSettledResult<R>[] = [];
+  for (let i = 0; i < items.length; i += concurrency) {
+    const batch = items.slice(i, i + concurrency);
+    const batchResults = await Promise.allSettled(batch.map(fn));
+    results.push(...batchResults);
+  }
+  return results;
 }
 
 export async function POST(req: NextRequest) {
@@ -15,9 +31,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ results: [] }, { status: 400 });
   }
 
-  const results = await Promise.allSettled(
-    ids.map((id) => getPokemonDetail(id)),
-  );
+  const results = await withConcurrency(ids, getPokemonDetail, CONCURRENCY);
 
   const data: PokemonBatch[] = results
     .filter((r) => r.status === "fulfilled")

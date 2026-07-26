@@ -26,7 +26,7 @@ export async function getPokemonList(limit = 151, offset = 0) {
 
 export async function getPokemonDetail(nameOrId: string | number): Promise<Pokemon> {
     const res = await fetch(`${BASE_URL}/pokemon/${nameOrId}`, {
-        next: { revalidate: 3600 }
+        next: { revalidate: 86400 }
     });
     if (!res.ok) throw new Error('Pokemon không tồn tại');
     return res.json();

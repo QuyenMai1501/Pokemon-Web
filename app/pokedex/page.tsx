@@ -8,7 +8,7 @@ import TypeBadge, { typeColors } from "@/components/pokemon/TypeBadge";
 import { getPokemonList } from "@/lib/pokeApi";
 import styles from "./page.module.css";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 40;
 
 const generations = [
   { name: "Gen 1", offset: 0, limit: 151 },
@@ -78,10 +78,24 @@ export default function PokedexPage() {
     [allPokemon, visibleCount],
   );
 
-  useEffect(() => {
-    if (displayedIds.length === 0) return;
+  const searchMatchIds = useMemo(() => {
+    if (!debouncedSearch) return [];
+    const term = debouncedSearch.toLowerCase();
+    return allPokemon
+      .filter((p) => {
+        const id = Number(p.url.split("/").filter(Boolean).pop());
+        return p.name.toLowerCase().includes(term) ||
+               id.toString().padStart(3, "0").includes(term);
+      })
+      .map((p) => Number(p.url.split("/").filter(Boolean).pop()));
+  }, [debouncedSearch, allPokemon]);
 
-    const idsToFetch = displayedIds.filter((id) => !fetchedRef.current.has(id));
+  const effectiveIds = debouncedSearch ? searchMatchIds : displayedIds;
+
+  useEffect(() => {
+    if (effectiveIds.length === 0) return;
+
+    const idsToFetch = effectiveIds.filter((id) => !fetchedRef.current.has(id));
     if (idsToFetch.length === 0) return;
 
     idsToFetch.forEach((id) => fetchedRef.current.add(id));
@@ -105,7 +119,7 @@ export default function PokedexPage() {
       .finally(() => {
         loadingRef.current = false;
       });
-  }, [displayedIds]);
+  }, [effectiveIds]);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -125,7 +139,7 @@ export default function PokedexPage() {
   }, [allPokemon.length]);
 
   const filteredPokemon = useMemo(() => {
-    const loaded = displayedIds
+    const loaded = effectiveIds
       .map((id) => pokemonData[id])
       .filter(Boolean);
 
@@ -141,7 +155,7 @@ export default function PokedexPage() {
         p.name.toLowerCase().includes(term) ||
         p.id.toString().padStart(3, "0").includes(term),
     );
-  }, [debouncedSearch, displayedIds, pokemonData, selectedType]);
+  }, [debouncedSearch, effectiveIds, pokemonData, selectedType]);
 
   const hasMore = visibleCount < allPokemon.length;
 
