@@ -1,0 +1,28 @@
+.wrap {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.badge {
+  display: inline-block;
+  border-radius: 9999px;
+  text-transform: capitalize;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+  font-weight: 500;
+}
+
+.small {
+  padding: 0.125rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+.medium {
+  padding: 0.25rem 1rem;
+  font-size: 0.875rem;
+}
+
+.placeholder {
+  height: 1.5rem;
+}

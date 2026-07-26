@@ -1,9 +1,9 @@
-// components/pokemon/MovesList.tsx
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
 import TypeBadge from "./TypeBadge";
 import { getMoveDetail } from "@/lib/pokeApi";
+import styles from "./MovesList.module.css";
 
 interface MoveDetail {
   name: string;
@@ -33,7 +33,6 @@ export default function MovesList({ pokemonMoves }: MovesListProps) {
       const detailedMoves: MoveDetail[] = [];
 
       for (const m of pokemonMoves.slice(0, 80)) {
-        // Giới hạn 80 move để tránh quá tải
         const detail = await getMoveDetail(m.move.url);
         if (detail) {
           const versionDetail = m.version_group_details[0] || {};
@@ -77,31 +76,35 @@ export default function MovesList({ pokemonMoves }: MovesListProps) {
   }, [moves, searchTerm, filterMethod]);
 
   if (loading) {
-    return (
-      <div className="text-center py-12 text-gray-500">
-        Đang tải danh sách chiêu thức...
-      </div>
-    );
+    return <div className={styles.loading}>Đang tải danh sách chiêu thức...</div>;
   }
 
-  return (
-    <div className="mt-12">
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
-        <h3 className="text-2xl font-bold text-gray-900">Danh sách Chiêu Thức</h3>
+  const methodBadge = (method: string, level: number) => {
+    if (method === "level-up") return <span className={styles.badgeLevelUp}>Level {level}</span>;
+    if (method === "machine") return <span className={styles.badgeMachine}>TM/HM</span>;
+    if (method === "egg") return <span className={styles.badgeEgg}>Egg</span>;
+    return <span className={styles.badge}>{method}</span>;
+  };
 
-        <div className="flex gap-4">
+  return (
+    <div className={styles.wrapper}>
+      <div className={styles.header}>
+        <h3 className={styles.title}>Danh sách Chiêu Thức</h3>
+
+        <div className={styles.toolbar}>
           <input
             type="text"
             placeholder="Tìm chiêu thức..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-white border border-gray-300 rounded-xl px-5 py-3 w-72 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 text-gray-900 placeholder-gray-400"
+            className={styles.searchInput}
           />
 
           <select
             value={filterMethod}
             onChange={(e) => setFilterMethod(e.target.value)}
-            className="bg-white border border-gray-300 rounded-xl px-5 py-3 text-gray-700 focus:outline-none focus:border-red-500">
+            className={styles.filterSelect}
+          >
             <option value="all">Tất cả cách học</option>
             <option value="level-up">Level Up</option>
             <option value="machine">TM/HM</option>
@@ -111,55 +114,38 @@ export default function MovesList({ pokemonMoves }: MovesListProps) {
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-sm">
-        <table className="w-full">
-          <thead className="bg-gray-50 sticky top-0">
+      <div className={styles.tableWrap}>
+        <table className={styles.table}>
+          <thead className={styles.thead}>
             <tr>
-              <th className="p-5 text-left font-semibold text-gray-700">Chiêu Thức</th>
-              <th className="p-5 text-left font-semibold text-gray-700">Hệ</th>
-              <th className="p-5 text-center font-semibold text-gray-700">Power</th>
-              <th className="p-5 text-center font-semibold text-gray-700">Accuracy</th>
-              <th className="p-5 text-center font-semibold text-gray-700">PP</th>
-              <th className="p-5 text-left font-semibold text-gray-700">Loại</th>
-              <th className="p-5 text-left font-semibold text-gray-700">Cách Học</th>
-              <th className="p-5 text-left font-semibold text-gray-700">Hiệu Ứng</th>
+              <th className={styles.th}>Chiêu Thức</th>
+              <th className={styles.th}>Hệ</th>
+              <th className={styles.thCenter}>Power</th>
+              <th className={styles.thCenter}>Accuracy</th>
+              <th className={styles.thCenter}>PP</th>
+              <th className={styles.th}>Loại</th>
+              <th className={styles.th}>Cách Học</th>
+              <th className={styles.th}>Hiệu Ứng</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody>
             {filteredMoves.map((move, index) => (
-              <tr
-                key={index}
-                className="hover:bg-gray-50 transition-colors">
-                <td className="p-5 font-medium capitalize text-gray-900">{move.name}</td>
-                <td className="p-5">
+              <tr key={index} className={styles.row}>
+                <td className={styles.cellName}>{move.name}</td>
+                <td className={styles.cell}>
                   <TypeBadge
                     types={[{ type: { name: move.type } }]}
                     size="small"
                   />
                 </td>
-                <td className="p-5 text-center font-mono font-bold text-gray-800">
-                  {move.power || "-"}
-                </td>
-                <td className="p-5 text-center font-mono text-gray-600">
+                <td className={styles.cellMono}>{move.power || "-"}</td>
+                <td className={styles.cellNumber}>
                   {move.accuracy ? `${move.accuracy}%` : "-"}
                 </td>
-                <td className="p-5 text-center font-mono text-gray-600">{move.pp}</td>
-                <td className="p-5 capitalize text-gray-700">{move.damageClass}</td>
-                <td className="p-5">
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs capitalize font-medium
-                    ${move.method === "level-up" ? "bg-green-100 text-green-700" : ""}
-                    ${move.method === "machine" ? "bg-blue-100 text-blue-700" : ""}
-                    ${move.method === "egg" ? "bg-purple-100 text-purple-700" : ""}
-                  `}>
-                    {move.method === "level-up"
-                      ? `Level ${move.level}`
-                      : move.method}
-                  </span>
-                </td>
-                <td className="p-5 text-sm text-gray-600 max-w-md">
-                  {move.effect}
-                </td>
+                <td className={styles.cellNumber}>{move.pp}</td>
+                <td className={styles.cellType}>{move.damageClass}</td>
+                <td className={styles.cell}>{methodBadge(move.method, move.level)}</td>
+                <td className={styles.cellEffect}>{move.effect}</td>
               </tr>
             ))}
           </tbody>
@@ -167,9 +153,7 @@ export default function MovesList({ pokemonMoves }: MovesListProps) {
       </div>
 
       {filteredMoves.length === 0 && (
-        <p className="text-center text-gray-400 py-8">
-          Không tìm thấy chiêu thức nào phù hợp.
-        </p>
+        <p className={styles.empty}>Không tìm thấy chiêu thức nào phù hợp.</p>
       )}
     </div>
   );

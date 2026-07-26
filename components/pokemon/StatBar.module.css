@@ -1,0 +1,39 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.label {
+  width: 6rem;
+  text-align: right;
+  font-weight: 500;
+  color: #4b5563;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.track {
+  flex: 1;
+  background: #e5e7eb;
+  height: 0.75rem;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background: #dc2626;
+  border-radius: 9999px;
+  transition: width 0.7s;
+}
+
+.value {
+  width: 3rem;
+  font-family: monospace;
+  text-align: right;
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}

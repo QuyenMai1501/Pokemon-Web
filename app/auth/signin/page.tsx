@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import styles from "./page.module.css";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -33,72 +34,64 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+    <div className={styles.container}>
       <Image
         src="/background.jpg"
         alt=""
         fill
-        className="object-cover"
+        style={{ objectFit: 'cover' }}
         priority
       />
-      <div className="absolute inset-0 bg-black/50" />
+      <div className={styles.overlay} />
 
-      {/* Card */}
-      <div className="relative w-full max-w-md bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl p-8 md:p-10">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-red-600 rounded-2xl mb-4 shadow-lg">
-            <span className="text-3xl">⚡</span>
+      <div className={styles.card}>
+        <div className={styles.cardHeader}>
+          <div className={styles.iconBox}>
+            <span className={styles.icon}>⚡</span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">Pokémon Web</h1>
-          <p className="text-gray-500 mt-1">Đăng nhập để tiếp tục</p>
+          <h1 className={styles.title}>Pokémon Web</h1>
+          <p className={styles.subtitle}>Đăng nhập để tiếp tục</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.field}>
+            <label className={styles.label}>Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 text-gray-900 placeholder-gray-400 transition"
+              className={styles.input}
               placeholder="your@email.com"
               required
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Mật khẩu</label>
+          <div className={styles.field}>
+            <label className={styles.label}>Mật khẩu</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 text-gray-900 placeholder-gray-400 transition"
+              className={styles.input}
               placeholder="••••••••"
               required
             />
           </div>
 
-          {error && (
-            <p className="text-red-600 text-sm text-center bg-red-50 py-2 px-4 rounded-lg">
-              {error}
-            </p>
-          )}
+          {error && <p className={styles.error}>{error}</p>}
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition disabled:opacity-50 shadow-lg shadow-red-600/25"
+            className={styles.submitBtn}
           >
             {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
         </form>
 
-        <div className="text-center mt-6">
-          <span className="text-gray-500 text-sm">Chưa có tài khoản? </span>
-          <Link
-            href="/auth/register"
-            className="text-red-600 hover:text-red-700 font-semibold text-sm transition"
-          >
+        <div className={styles.footer}>
+          <span className={styles.footerText}>Chưa có tài khoản? </span>
+          <Link href="/auth/register" className={styles.footerLink}>
             Đăng ký ngay
           </Link>
         </div>

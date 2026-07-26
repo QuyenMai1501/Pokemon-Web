@@ -1,4 +1,3 @@
-// app/pokedex/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,6 +6,7 @@ import Image from "next/image";
 import SearchBar from "@/components/pokemon/SearchBar";
 import TypeBadge from "@/components/pokemon/TypeBadge";
 import { getPokemonList } from "@/lib/pokeApi";
+import styles from "./page.module.css";
 
 const generations = [
   { name: "Gen 1", offset: 0, limit: 151 },
@@ -47,22 +47,19 @@ export default function PokedexPage() {
   }, [searchTerm, allPokemon]);
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 pb-12">
-      <div className="max-w-7xl mx-auto px-6 pt-8">
-        <h1 className="text-5xl font-bold text-center text-red-500 mb-2">
-          National Pokédex
-        </h1>
-        <p className="text-center text-gray-500 mb-10">
-          Tra cứu hơn 1000 Pokémon
-        </p>
+    <div className={styles.page}>
+      <div className={styles.inner}>
+        <h1 className={styles.title}>National Pokédex</h1>
+        <p className={styles.subtitle}>Tra cứu hơn 1000 Pokémon</p>
 
-        <div className="flex flex-col md:flex-row gap-4 mb-8">
+        <div className={styles.controls}>
           <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
           <select
             value={selectedGen}
             onChange={(e) => setSelectedGen(Number(e.target.value))}
-            className="bg-white border border-gray-300 rounded-xl px-6 py-3 text-gray-700 focus:outline-none focus:border-red-500">
+            className={styles.select}
+          >
             {generations.map((gen, i) => (
               <option key={i} value={i}>
                 {gen.name}
@@ -72,38 +69,34 @@ export default function PokedexPage() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+          <div className={styles.grid}>
             {[...Array(12)].map((_, i) => (
-              <div
-                key={i}
-                className="bg-gray-200 rounded-2xl h-64 animate-pulse"
-              />
+              <div key={i} className={styles.skeleton} />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+          <div className={styles.grid}>
             {filteredPokemon.map((pokemon) => {
               const id = pokemon.url.split("/").filter(Boolean).pop();
               return (
                 <Link
                   href={`/pokedex/${id}`}
                   key={pokemon.name}
-                  className="group">
-                  <div className="bg-white rounded-3xl p-6 hover:shadow-lg transition-all border border-gray-200 hover:border-red-500 h-full flex flex-col items-center shadow-sm">
-                    <div className="relative w-32 h-32 mb-4">
-                      <Image
-                        src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`}
-                        alt={pokemon.name}
-                        fill
-                        className="object-contain group-hover:scale-110 transition-transform duration-300"
-                        sizes="(max-width: 768px) 100px, 128px"
-                      />
-                    </div>
-                    <p className="text-xl font-semibold capitalize mb-3 text-gray-800">
-                      #{id?.padStart(3, "0")} {pokemon.name}
-                    </p>
-                    <TypeBadge types={[]} />
+                  className={styles.card}
+                >
+                  <div className={styles.spriteWrap}>
+                    <Image
+                      src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`}
+                      alt={pokemon.name}
+                      fill
+                      className={styles.sprite}
+                      sizes="(max-width: 768px) 100px, 128px"
+                    />
                   </div>
+                  <p className={styles.name}>
+                    #{id?.padStart(3, "0")} {pokemon.name}
+                  </p>
+                  <TypeBadge types={[]} />
                 </Link>
               );
             })}

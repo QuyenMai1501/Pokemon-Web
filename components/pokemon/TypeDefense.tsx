@@ -1,5 +1,4 @@
-// components/pokemon/TypeDefense.tsx
-import TypeBadge from './TypeBadge';
+import styles from "./TypeDefense.module.css";
 
 interface TypeDefenseProps {
   types: Array<{ type: { name: string } }>;
@@ -14,11 +13,11 @@ const typeShortNames: Record<string, string> = {
 };
 
 const typeColors: Record<string, string> = {
-  normal: 'bg-gray-400', fire: 'bg-red-500', water: 'bg-blue-500', grass: 'bg-green-500',
-  electric: 'bg-yellow-400', ice: 'bg-cyan-400', fighting: 'bg-orange-600', poison: 'bg-purple-600',
-  ground: 'bg-amber-700', flying: 'bg-sky-400', psychic: 'bg-pink-500', bug: 'bg-lime-500',
-  rock: 'bg-yellow-800', ghost: 'bg-indigo-700', dragon: 'bg-violet-600', dark: 'bg-gray-800',
-  steel: 'bg-slate-400', fairy: 'bg-pink-300'
+  normal: '#9ca3af', fire: '#ef4444', water: '#3b82f6', grass: '#22c55e',
+  electric: '#eab308', ice: '#67e8f9', fighting: '#c2410c', poison: '#9333ea',
+  ground: '#b45309', flying: '#7dd3fc', psychic: '#ec4899', bug: '#65a30d',
+  rock: '#ca8a04', ghost: '#6d28d9', dragon: '#7c3aed', dark: '#1f2937',
+  steel: '#94a3b8', fairy: '#f9a8d4'
 };
 
 export default function TypeDefense({ types, damageRelations }: TypeDefenseProps) {
@@ -42,8 +41,7 @@ export default function TypeDefense({ types, damageRelations }: TypeDefenseProps
       }
     });
 
-    // Đảm bảo không bị float lạ
-    return Math.round(multiplier * 4) / 4; // 0, 0.25, 0.5, 1, 2, 4
+    return Math.round(multiplier * 4) / 4;
   };
 
   const getDisplayValue = (multi: number) => {
@@ -55,41 +53,39 @@ export default function TypeDefense({ types, damageRelations }: TypeDefenseProps
     return '1x';
   };
 
-  const getBgColor = (multi: number) => {
-    if (multi === 0) return 'bg-gray-900 text-gray-400';
-    if (multi < 1) return 'bg-red-100 text-red-700';
-    if (multi < 1/2) return 'bg-red-200 text-red-800'
-    if (multi > 1) return 'bg-green-100 text-green-700';
-    if (multi > 2) return 'bg-green-200 text-green-800'
-    return 'bg-gray-100 text-gray-600';
+  const getMultiplierStyle = (multi: number): React.CSSProperties => {
+    if (multi === 0) return { background: '#111827', color: '#9ca3af' };
+    if (multi < 1) return { background: '#fef2f2', color: '#b91c1c' };
+    if (multi < 1/2) return { background: '#fecaca', color: '#991b1b' };
+    if (multi > 2) return { background: '#dcfce7', color: '#15803d' };
+    if (multi > 1) return { background: '#f0fdf4', color: '#166534' };
+    return { background: '#f3f4f6', color: '#4b5563' };
   };
 
   return (
     <div>
-      <h3 className="text-xl font-semibold text-gray-900 mb-2">Type Defenses</h3>
-      <p className="text-gray-500 mb-6">
+      <h3 className={styles.title}>Type Defenses</h3>
+      <p className={styles.subtitle}>
         The effectiveness of each type on {types.map(t => t.type.name).join(" + ")}.
       </p>
 
-      <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-        <div className="grid grid-cols-9 gap-3 text-center">
-          {allTypes.map((type) => {
-            const multiplier = getMultiplier(type);
-            const display = getDisplayValue(multiplier);
-            const colorClass = typeColors[type] || 'bg-gray-500';
+      <div className={styles.grid}>
+        {allTypes.map((type) => {
+          const multiplier = getMultiplier(type);
+          const display = getDisplayValue(multiplier);
+          const bgColor = typeColors[type] || '#6b7280';
 
-            return (
-              <div key={type} className="flex flex-col items-center">
-                <div className={`w-11 h-11 ${colorClass} text-white text-xs font-bold rounded-2xl flex items-center justify-center shadow-md mb-3`}>
-                  {typeShortNames[type]}
-                </div>
-                <div className={`text-base font-bold px-5 py-2.5 rounded-2xl ${getBgColor(multiplier)}`}>
-                  {display}
-                </div>
+          return (
+            <div key={type} className={styles.col}>
+              <div className={styles.typeBox} style={{ backgroundColor: bgColor }}>
+                {typeShortNames[type]}
               </div>
-            );
-          })}
-        </div>
+              <div className={styles.multiplier} style={getMultiplierStyle(multiplier)}>
+                {display}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
