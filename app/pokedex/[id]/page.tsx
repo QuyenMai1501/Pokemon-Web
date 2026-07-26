@@ -5,12 +5,13 @@ import TypeBadge from "@/components/pokemon/TypeBadge";
 import EvolutionChain from "@/components/pokemon/EvolutionChain";
 import StatBar from "@/components/pokemon/StatBar";
 import MovesList from "@/components/pokemon/MovesList";
+import type { Pokemon } from "@/lib/pokeApi";
 import {
-  getPokemonDetail,
+  getPokemonDetailCached,
   getPokemonSpecies,
   getEvolutionChain,
   getTypeDefense,
-  getAbilityDetail,
+  getAbilityDetailCached,
 } from "@/lib/pokeApi";
 import TypeDefense from "@/components/pokemon/TypeDefense";
 import AbilityTooltip from "@/components/pokemon/AbilityTooltip";
@@ -24,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
 
   try {
-    const pokemon = await getPokemonDetail(id);
+    const pokemon = await getPokemonDetailCached(id);
     return {
       title: `#${pokemon.id.toString().padStart(3, "0")} ${pokemon.name} — Pokédex`,
       description: `Thông tin chi tiết về Pokémon ${pokemon.name}`,
@@ -37,11 +38,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PokemonDetailPage({ params }: Props) {
   const { id } = await params;
 
-  let pokemon, species, evolutionData, damageRelations;
+  let pokemon: Pokemon;
+  let species, evolutionData, damageRelations, abilitiesWithDesc;
+  let stats, flavorText = "", genus = "";
+  const evolutionNames: string[] = [];
+  const evolutionIds: number[] = [];
 
   try {
     [pokemon, species] = await Promise.all([
-      getPokemonDetail(id),
+      getPokemonDetailCached(id),
       getPokemonSpecies(id),
     ]);
 
@@ -51,6 +56,72 @@ export default async function PokemonDetailPage({ params }: Props) {
         : Promise.resolve(null),
       getTypeDefense(pokemon.types.map((t: any) => t.type.name)),
     ]);
+
+    const abilityDetails = await Promise.all(
+      pokemon.abilities.map((ab: any) => getAbilityDetailCached(ab.ability.url)),
+    );
+
+    abilitiesWithDesc = pokemon.abilities.map((ab: any, index: number) => {
+      const detail = abilityDetails[index];
+      const effectEntry =
+        detail?.effect_entries?.find((e: any) => e.language.name === "vi") ||
+        detail?.effect_entries?.find((e: any) => e.language.name === "en");
+
+      return {
+        name: ab.ability.name,
+        isHidden: ab.is_hidden,
+        effect: effectEntry?.short_effect || "Không có mô tả.",
+      };
+    });
+
+    const flavorTextEntry =
+      species.flavor_text_entries?.find(
+        (entry: any) => entry.language.name === "vi",
+      ) ||
+      species.flavor_text_entries?.find(
+        (entry: any) => entry.language.name === "en",
+      );
+
+    flavorText = flavorTextEntry?.flavor_text?.replace(/\f/g, " ") || "Không có mô tả";
+
+    genus = species.genera?.find((g: any) => g.language.name === "en")?.genus || "";
+
+    stats = pokemon.stats.map((stat: any) => ({
+      name: stat.stat.name
+        .replace("hp", "HP")
+        .replace("attack", "Attack")
+        .replace("defense", "Defense")
+        .replace("special-attack", "Sp. Atk")
+        .replace("special-defense", "Sp. Def")
+        .replace("speed", "Speed"),
+      value: stat.base_stat,
+    }));
+
+    if (evolutionData?.chain) {
+      let current = evolutionData.chain;
+
+      while (current) {
+        const name = current.species.name;
+        evolutionNames.push(name);
+
+        const speciesUrl = current.species.url;
+        const idMatch = speciesUrl.match(/\/pokemon\/(\d+)\//);
+
+        if (idMatch && idMatch[1]) {
+          evolutionIds.push(parseInt(idMatch[1]));
+        } else {
+          try {
+            const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
+            const data = await res.json();
+            evolutionIds.push(data.id);
+          } catch {
+            evolutionIds.push(0);
+          }
+        }
+
+        current = current.evolves_to?.[0];
+      }
+    }
   } catch {
     return (
       <div className={styles.page}>
@@ -65,75 +136,6 @@ export default async function PokemonDetailPage({ params }: Props) {
       </div>
     );
   }
-
-  const flavorTextEntry =
-    species.flavor_text_entries?.find(
-      (entry: any) => entry.language.name === "vi",
-    ) ||
-    species.flavor_text_entries?.find(
-      (entry: any) => entry.language.name === "en",
-    );
-
-  const flavorText =
-    flavorTextEntry?.flavor_text?.replace(/\f/g, " ") || "Không có mô tả";
-
-  const genus =
-    species.genera?.find((g: any) => g.language.name === "en")?.genus || "";
-
-  const stats = pokemon.stats.map((stat: any) => ({
-    name: stat.stat.name
-      .replace("hp", "HP")
-      .replace("attack", "Attack")
-      .replace("defense", "Defense")
-      .replace("special-attack", "Sp. Atk")
-      .replace("special-defense", "Sp. Def")
-      .replace("speed", "Speed"),
-    value: stat.base_stat,
-  }));
-
-  const evolutionNames: string[] = [];
-  const evolutionIds: number[] = [];
-
-  if (evolutionData?.chain) {
-    let current = evolutionData.chain;
-
-    while (current) {
-      const name = current.species.name;
-      evolutionNames.push(name);
-
-      const speciesUrl = current.species.url;
-      const idMatch = speciesUrl.match(/\/pokemon\/(\d+)\//);
-
-      if (idMatch && idMatch[1]) {
-        evolutionIds.push(parseInt(idMatch[1]));
-      } else {
-        try {
-          const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
-          const data = await res.json();
-          evolutionIds.push(data.id);
-        } catch {
-          evolutionIds.push(0);
-        }
-      }
-
-      current = current.evolves_to?.[0];
-    }
-  }
-
-  const abilitiesWithDesc = await Promise.all(
-    pokemon.abilities.map(async (ab: any) => {
-      const detail = await getAbilityDetail(ab.ability.url);
-      const effectEntry =
-        detail.effect_entries?.find((e: any) => e.language.name === "vi") ||
-        detail.effect_entries?.find((e: any) => e.language.name === "en");
-
-      return {
-        name: ab.ability.name,
-        isHidden: ab.is_hidden,
-        effect: effectEntry?.short_effect || "Không có mô tả.",
-      };
-    }),
-  );
 
   return (
     <div className={styles.page}>
@@ -211,7 +213,7 @@ export default async function PokemonDetailPage({ params }: Props) {
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>Abilities</h3>
               <div className={styles.abilitiesList}>
-                {abilitiesWithDesc.map((ab, index) => (
+                {abilitiesWithDesc.map((ab: any, index: number) => (
                   <AbilityTooltip
                     key={index}
                     name={ab.name}

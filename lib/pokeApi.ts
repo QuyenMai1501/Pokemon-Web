@@ -1,4 +1,4 @@
-import { relative } from "path";
+import { cache } from "react";
 
 const BASE_URL = 'https://pokeapi.co/api/v2';
 
@@ -31,6 +31,8 @@ export async function getPokemonDetail(nameOrId: string | number): Promise<Pokem
     if (!res.ok) throw new Error('Pokemon không tồn tại');
     return res.json();
 }
+
+export const getPokemonDetailCached = cache(getPokemonDetail);
 
 export async function getPokemonSpecies(id: string | number) {
     const res = await fetch(`${BASE_URL}/pokemon-species/${id}`, {
@@ -91,7 +93,9 @@ export async function getTypeDefense(types: string[]) {
 }
 
 export async function getAbilityDetail(abilityUrl: string) {
-    const res = await fetch(abilityUrl, {next: {revalidate: 3600}});
+    const res = await fetch(abilityUrl, {next: {revalidate: 86400}});
     if (!res.ok) return null;
     return res.json();
 }
+
+export const getAbilityDetailCached = cache(getAbilityDetail);
