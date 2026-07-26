@@ -45,14 +45,14 @@ export default function PokedexPage() {
   const [selectedGen, setSelectedGen] = useState(0);
   const [selectedType, setSelectedType] = useState("All");
 
-  const visibleCount = selectedType !== "All" ? allPokemon.length : scrollCount;
+  const visibleCount = selectedType !== "All" || debouncedSearch ? allPokemon.length : scrollCount;
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadingRef = useRef(false);
   const fetchedRef = useRef(new Set<number>());
 
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 300);
+    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 150);
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
