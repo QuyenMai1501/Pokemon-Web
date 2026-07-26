@@ -13,6 +13,7 @@ import {
 } from "@/lib/pokeApi";
 import TypeDefense from "@/components/pokemon/TypeDefense";
 import AbilityTooltip from "@/components/pokemon/AbilityTooltip";
+import styles from "./page.module.css";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -32,14 +33,14 @@ export default async function PokemonDetailPage({ params }: Props) {
     }
   } catch (error) {
     return (
-      <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-red-500 mb-4">
-            Pokémon không tồn tại
-          </h1>
-          <Link href="/pokedex" className="text-blue-400 hover:underline">
-            ← Quay lại Pokédex
-          </Link>
+      <div className={styles.page}>
+        <div className={styles.inner}>
+          <div style={{ textAlign: "center", paddingTop: "4rem" }}>
+            <h1 className={styles.pokemonName}>Pokémon không tồn tại</h1>
+            <Link href="/pokedex" className={styles.backLink}>
+              ← Quay lại Pokédex
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -75,7 +76,6 @@ export default async function PokemonDetailPage({ params }: Props) {
     value: stat.base_stat,
   }));
 
-  // === EVOLUTION CHAIN - ĐÃ FIX ID ===
   const evolutionNames: string[] = [];
   const evolutionIds: number[] = [];
 
@@ -86,14 +86,12 @@ export default async function PokemonDetailPage({ params }: Props) {
       const name = current.species.name;
       evolutionNames.push(name);
 
-      // Cách 1: Lấy ID từ URL species
       const speciesUrl = current.species.url;
       const idMatch = speciesUrl.match(/\/pokemon\/(\d+)\//);
 
       if (idMatch && idMatch[1]) {
         evolutionIds.push(parseInt(idMatch[1]));
       } else {
-        // Cách 2: Fallback dùng tên để tìm ID (gọi API nhỏ)
         try {
           const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
           const data = await res.json();
@@ -123,53 +121,45 @@ export default async function PokemonDetailPage({ params }: Props) {
   );
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white pb-12">
-      <div className="max-w-5xl mx-auto px-6 pt-8">
-        <Link
-          href="/pokedex"
-          className="inline-flex items-center text-red-400 hover:text-red-500 mb-8">
+    <div className={styles.page}>
+      <div className={styles.inner}>
+        <Link href="/pokedex" className={styles.backLink}>
           ← Quay lại Pokédex
         </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {/* Phần hình ảnh */}
-          <div className="flex flex-col items-center">
-            <div className="relative w-80 h-80 mb-8">
-              <Image
-                src={
-                  pokemon.sprites.other?.["official-artwork"]?.front_default ||
-                  pokemon.sprites.front_default
-                }
-                alt={pokemon.name}
-                fill
-                className="object-contain drop-shadow-2xl"
-                priority
-                sizes="(max-width: 768px) 300px, 400px"
-              />
+        <div className={styles.grid2}>
+          <div className={styles.imageSection}>
+            <div className={styles.imageCard}>
+              <div className={styles.imageWrap}>
+                <Image
+                  src={
+                    pokemon.sprites.other?.["official-artwork"]?.front_default ||
+                    pokemon.sprites.front_default
+                  }
+                  alt={pokemon.name}
+                  fill
+                  style={{ objectFit: 'contain', filter: 'drop-shadow(0 20px 13px rgba(0,0,0,0.03))' }}
+                  priority
+                  sizes="(max-width: 768px) 300px, 400px"
+                />
+              </div>
             </div>
 
-            <div className="text-center">
-              <p className="text-5xl font-bold text-red-500">
-                #{pokemon.id.toString().padStart(3, "0")}
-              </p>
-              <h1 className="text-6xl font-bold capitalize mt-2">
-                {pokemon.name}
-              </h1>
-              <p className="text-xl text-gray-400 mt-1">{genus}</p>
-            </div>
+            <p className={styles.idText}>
+              #{pokemon.id.toString().padStart(3, "0")}
+            </p>
+            <h1 className={styles.pokemonName}>{pokemon.name}</h1>
+            <p className={styles.genus}>{genus}</p>
 
-            <div className="mt-8">
+            <div className={styles.badgeWrap}>
               <TypeBadge types={pokemon.types} size="medium" />
             </div>
           </div>
 
-          {/* Phần thông tin */}
-          <div className="space-y-10">
-            <div>
-              <h3 className="text-2xl font-semibold mb-3">Mô tả</h3>
-              <p className="text-gray-300 leading-relaxed text-lg">
-                {flavorText}
-              </p>
+          <div className={styles.infoSection}>
+            <div className={styles.infoCard}>
+              <h3 className={styles.sectionTitle}>Mô tả</h3>
+              <p className={styles.description}>{flavorText}</p>
             </div>
 
             {evolutionNames.length > 1 && (
@@ -179,9 +169,9 @@ export default async function PokemonDetailPage({ params }: Props) {
               />
             )}
 
-            <div>
-              <h3 className="text-2xl font-semibold mb-5">Chỉ số cơ bản</h3>
-              <div className="space-y-4">
+            <div className={styles.statsSection}>
+              <h3 className={styles.statsTitle}>Chỉ số cơ bản</h3>
+              <div className={styles.statsList}>
                 {stats.map((stat: any) => (
                   <StatBar
                     key={stat.name}
@@ -192,24 +182,20 @@ export default async function PokemonDetailPage({ params }: Props) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
-              <div className="bg-gray-900 p-6 rounded-2xl">
-                <p className="text-gray-400 text-sm">Chiều cao</p>
-                <p className="text-3xl font-semibold mt-1">
-                  {pokemon.height / 10} m
-                </p>
+            <div className={styles.statGrid}>
+              <div className={styles.statCard}>
+                <p className={styles.statLabel}>Chiều cao</p>
+                <p className={styles.statValue}>{pokemon.height / 10} m</p>
               </div>
-              <div className="bg-gray-900 p-6 rounded-2xl">
-                <p className="text-gray-400 text-sm">Cân nặng</p>
-                <p className="text-3xl font-semibold mt-1">
-                  {pokemon.weight / 10} kg
-                </p>
+              <div className={styles.statCard}>
+                <p className={styles.statLabel}>Cân nặng</p>
+                <p className={styles.statValue}>{pokemon.weight / 10} kg</p>
               </div>
             </div>
 
-            <div>
-              <h3 className="text-2xl font-semibold mb-4">Abilities</h3>
-              <div className="flex flex-wrap gap-3">
+            <div className={styles.abilitiesSection}>
+              <h3 className={styles.abilitiesTitle}>Abilities</h3>
+              <div className={styles.abilitiesList}>
                 {abilitiesWithDesc.map((ab, index) => (
                   <AbilityTooltip
                     key={index}
@@ -221,10 +207,12 @@ export default async function PokemonDetailPage({ params }: Props) {
               </div>
             </div>
 
-            <TypeDefense
-              types={pokemon.types}
-              damageRelations={damageRelations}
-            />
+            <div className={styles.typeDefenseSection}>
+              <TypeDefense
+                types={pokemon.types}
+                damageRelations={damageRelations}
+              />
+            </div>
           </div>
         </div>
         <MovesList pokemonMoves={pokemon.moves} />

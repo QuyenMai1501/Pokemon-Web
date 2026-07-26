@@ -1,0 +1,192 @@
+.page {
+  min-height: 100vh;
+  background: #f9fafb;
+  padding-bottom: 3rem;
+}
+
+.inner {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 0;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  color: #dc2626;
+  font-weight: 500;
+  text-decoration: none;
+  margin-bottom: 2rem;
+  transition: color 0.15s;
+}
+
+.backLink:hover {
+  color: #b91c1c;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+}
+
+@media (min-width: 1024px) {
+  .grid2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.imageSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.imageCard {
+  background: #fff;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  border: 1px solid #f3f4f6;
+}
+
+.imageWrap {
+  position: relative;
+  width: 20rem;
+  height: 20rem;
+}
+
+@media (max-width: 768px) {
+  .imageWrap {
+    width: 16rem;
+    height: 16rem;
+  }
+}
+
+.idText {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #dc2626;
+  margin-top: 1.5rem;
+}
+
+.pokemonName {
+  font-size: 3.75rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  color: #111827;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.genus {
+  font-size: 1.25rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.badgeWrap {
+  margin-top: 1.5rem;
+}
+
+.infoSection {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.infoCard {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1);
+  border: 1px solid #f3f4f6;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.description {
+  color: #4b5563;
+  line-height: 1.625;
+}
+
+.statsSection {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1);
+  border: 1px solid #f3f4f6;
+}
+
+.statsTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1.25rem;
+}
+
+.statsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.statCard {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1);
+  border: 1px solid #f3f4f6;
+}
+
+.statLabel {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.statValue {
+  font-size: 1.875rem;
+  font-weight: 600;
+  color: #111827;
+  margin-top: 0.25rem;
+}
+
+.abilitiesSection {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1);
+  border: 1px solid #f3f4f6;
+}
+
+.abilitiesTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.abilitiesList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.typeDefenseSection {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1);
+  border: 1px solid #f3f4f6;
+}

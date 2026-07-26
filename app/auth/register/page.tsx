@@ -1,9 +1,10 @@
-// app/auth/register/page.tsx
 'use client';
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
+import styles from "./page.module.css";
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
@@ -53,7 +54,6 @@ export default function RegisterPage() {
       if (!res.ok) {
         setErrors({ general: data.error });
       } else {
-        alert("Đăng ký thành công!");
         router.push("/auth/signin");
       }
     } catch {
@@ -64,30 +64,101 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-950 p-4">
-      <div className="w-full max-w-md p-8 bg-gray-900 rounded-2xl shadow-2xl border border-gray-800">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-red-500">Pokémon Web</h1>
-          <p className="text-gray-400 mt-2">Tạo tài khoản Trainer</p>
+    <div className={styles.container}>
+      <Image
+        src="/background.jpg"
+        alt=""
+        fill
+        style={{ objectFit: 'cover' }}
+        priority
+      />
+      <div className={styles.overlay} />
+
+      <div className={styles.card}>
+        <div className={styles.cardHeader}>
+          <div className={styles.iconBox}>
+            <span className={styles.icon}>⚡</span>
+          </div>
+          <h1 className={styles.title}>Pokémon Web</h1>
+          <p className={styles.subtitle}>Tạo tài khoản Trainer</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Các field username, email, name, password, confirmPassword giống trước */}
-          {/* ... (giữ nguyên code field cũ, chỉ thêm error hiển thị) */}
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.field}>
+            <label className={styles.label}>Username</label>
+            <input
+              type="text"
+              value={formData.username}
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              className={styles.input}
+              placeholder="TrainerName"
+            />
+            {errors.username && <p className={styles.fieldError}>{errors.username}</p>}
+          </div>
 
-          {errors.general && <p className="text-red-500 text-center">{errors.general}</p>}
+          <div className={styles.field}>
+            <label className={styles.label}>Email</label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              className={styles.input}
+              placeholder="your@email.com"
+            />
+            {errors.email && <p className={styles.fieldError}>{errors.email}</p>}
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label}>Tên hiển thị</label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className={styles.input}
+              placeholder="(tuỳ chọn)"
+            />
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label}>Mật khẩu</label>
+            <input
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              className={styles.input}
+              placeholder="••••••••"
+            />
+            {errors.password && <p className={styles.fieldError}>{errors.password}</p>}
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label}>Xác nhận mật khẩu</label>
+            <input
+              type="password"
+              value={formData.confirmPassword}
+              onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+              className={styles.input}
+              placeholder="••••••••"
+            />
+            {errors.confirmPassword && <p className={styles.fieldError}>{errors.confirmPassword}</p>}
+          </div>
+
+          {errors.general && <p className={styles.generalError}>{errors.general}</p>}
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition"
+            className={styles.submitBtn}
           >
             {isLoading ? "Đang xử lý..." : "Tạo tài khoản"}
           </button>
         </form>
 
-        <div className="text-center mt-6">
-          Đã có tài khoản? <Link href="/auth/signin" className="text-red-500 hover:underline">Đăng nhập</Link>
+        <div className={styles.footer}>
+          <span className={styles.footerText}>Đã có tài khoản? </span>
+          <Link href="/auth/signin" className={styles.footerLink}>
+            Đăng nhập
+          </Link>
         </div>
       </div>
     </div>

@@ -1,8 +1,8 @@
-// components/pokemon/EvolutionChain.tsx
 'use client';
 
 import Image from 'next/image';
 import Link from 'next/link';
+import styles from "./EvolutionChain.module.css";
 
 interface EvolutionChainProps {
   evolutionNames: string[];
@@ -11,25 +11,25 @@ interface EvolutionChainProps {
 
 export default function EvolutionChain({ evolutionNames, evolutionIds }: EvolutionChainProps) {
   return (
-    <div>
-      <h3 className="text-2xl font-semibold mb-4">Chuỗi Tiến Hóa</h3>
-      <div className="flex flex-wrap items-center gap-6 bg-gray-900 p-6 rounded-2xl">
+    <div className={styles.card}>
+      <h3 className={styles.title}>Chuỗi Tiến Hóa</h3>
+      <div className={styles.list}>
         {evolutionNames.map((name, index) => {
           const id = evolutionIds[index] || 0;
           const nameLower = name.toLowerCase();
 
           return (
-            <div key={index} className="flex items-center gap-4">
+            <div key={index} className={styles.item}>
               <Link
                 href={`/pokedex/${name}`}
-                className="group flex flex-col items-center hover:scale-105 transition-transform"
+                className={styles.link}
               >
-                <div className="relative w-24 h-24 bg-gray-800 rounded-2xl overflow-hidden border border-gray-700">
+                <div className={styles.imageBox}>
                   <Image
                     src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`}
                     alt={name}
                     fill
-                    className="object-contain p-2"
+                    style={{ objectFit: 'contain', padding: '0.5rem' }}
                     sizes="96px"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
@@ -37,12 +37,10 @@ export default function EvolutionChain({ evolutionNames, evolutionIds }: Evoluti
                     }}
                   />
                 </div>
-                <p className="text-sm capitalize mt-2 text-gray-300 group-hover:text-white text-center">
-                  {name}
-                </p>
+                <p className={styles.itemName}>{name}</p>
               </Link>
               {index < evolutionNames.length - 1 && (
-                <span className="text-4xl text-gray-600 mt-6">→</span>
+                <span className={styles.arrow}>→</span>
               )}
             </div>
           );

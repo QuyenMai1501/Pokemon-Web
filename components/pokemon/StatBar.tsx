@@ -1,3 +1,5 @@
+import styles from "./StatBar.module.css";
+
 interface StatBarProps {
   name: string;
   value: number;
@@ -6,15 +8,15 @@ interface StatBarProps {
 
 export default function StatBar({ name, value, max = 255 }: StatBarProps) {
   return (
-    <div className="flex items-center gap-4">
-      <div className="w-24 text-right font-medium text-gray-400">{name}</div>
-      <div className="flex-1 bg-gray-800 h-3 rounded-full overflow-hidden">
+    <div className={styles.row}>
+      <div className={styles.label}>{name}</div>
+      <div className={styles.track}>
         <div
-          className="h-full bg-red-500 transition-all duration-700"
+          className={styles.fill}
           style={{ width: `${(value / max) * 100}%` }}
         />
       </div>
-      <div className="w-12 font-mono text-right font-semibold">{value}</div>
+      <div className={styles.value}>{value}</div>
     </div>
   );
 }

@@ -1,0 +1,27 @@
+.wrap {
+  max-width: 28rem;
+  margin: 0 auto 2.5rem;
+  flex: 1;
+}
+
+.input {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 9999px;
+  font-size: 1.125rem;
+  color: #111827;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input::placeholder {
+  color: #9ca3af;
+}
+
+.input:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+}
