@@ -1,8 +1,8 @@
-// app/auth/register/page.tsx
 'use client';
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -63,86 +63,109 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-950 p-4">
-      <div className="w-full max-w-md p-8 bg-gray-900 rounded-2xl shadow-2xl border border-gray-800">
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      <Image
+        src="/background.jpg"
+        alt=""
+        fill
+        className="object-cover"
+        priority
+      />
+      <div className="absolute inset-0 bg-black/50" />
+
+      {/* Card */}
+      <div className="relative w-full max-w-md bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl p-8 md:p-10">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-red-500">Pokémon Web</h1>
-          <p className="text-gray-400 mt-2">Tạo tài khoản Trainer</p>
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-red-600 rounded-2xl mb-4 shadow-lg">
+            <span className="text-3xl">⚡</span>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900">Pokémon Web</h1>
+          <p className="text-gray-500 mt-1">Tạo tài khoản Trainer</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Username</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Username</label>
             <input
               type="text"
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-red-500 text-white"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 text-gray-900 placeholder-gray-400 transition"
               placeholder="TrainerName"
             />
-            {errors.username && <p className="text-red-400 text-sm mt-1">{errors.username}</p>}
+            {errors.username && <p className="text-red-600 text-sm mt-1">{errors.username}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
             <input
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-red-500 text-white"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 text-gray-900 placeholder-gray-400 transition"
               placeholder="your@email.com"
             />
-            {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
+            {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Tên hiển thị</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Tên hiển thị</label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-red-500 text-white"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 text-gray-900 placeholder-gray-400 transition"
               placeholder="(tuỳ chọn)"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Mật khẩu</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Mật khẩu</label>
             <input
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-red-500 text-white"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 text-gray-900 placeholder-gray-400 transition"
               placeholder="••••••••"
             />
-            {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
+            {errors.password && <p className="text-red-600 text-sm mt-1">{errors.password}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Xác nhận mật khẩu</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Xác nhận mật khẩu</label>
             <input
               type="password"
               value={formData.confirmPassword}
               onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-red-500 text-white"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 text-gray-900 placeholder-gray-400 transition"
               placeholder="••••••••"
             />
-            {errors.confirmPassword && <p className="text-red-400 text-sm mt-1">{errors.confirmPassword}</p>}
+            {errors.confirmPassword && <p className="text-red-600 text-sm mt-1">{errors.confirmPassword}</p>}
           </div>
 
-          {errors.general && <p className="text-red-500 text-center">{errors.general}</p>}
+          {errors.general && (
+            <p className="text-red-600 text-sm text-center bg-red-50 py-2 px-4 rounded-lg">
+              {errors.general}
+            </p>
+          )}
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition"
+            className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition disabled:opacity-50 shadow-lg shadow-red-600/25"
           >
             {isLoading ? "Đang xử lý..." : "Tạo tài khoản"}
           </button>
         </form>
 
         <div className="text-center mt-6">
-          Đã có tài khoản? <Link href="/auth/signin" className="text-red-500 hover:underline">Đăng nhập</Link>
+          <span className="text-gray-500 text-sm">Đã có tài khoản? </span>
+          <Link
+            href="/auth/signin"
+            className="text-red-600 hover:text-red-700 font-semibold text-sm transition"
+          >
+            Đăng nhập
+          </Link>
         </div>
       </div>
     </div>
