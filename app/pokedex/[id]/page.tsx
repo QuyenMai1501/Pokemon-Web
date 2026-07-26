@@ -32,12 +32,12 @@ export default async function PokemonDetailPage({ params }: Props) {
     }
   } catch (error) {
     return (
-      <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 text-gray-800 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-red-500 mb-4">
             Pokémon không tồn tại
           </h1>
-          <Link href="/pokedex" className="text-blue-400 hover:underline">
+          <Link href="/pokedex" className="text-red-500 hover:underline">
             ← Quay lại Pokédex
           </Link>
         </div>
@@ -123,51 +123,51 @@ export default async function PokemonDetailPage({ params }: Props) {
   );
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white pb-12">
+    <div className="min-h-screen bg-gray-50 text-gray-800 pb-12">
       <div className="max-w-5xl mx-auto px-6 pt-8">
         <Link
           href="/pokedex"
-          className="inline-flex items-center text-red-400 hover:text-red-500 mb-8">
+          className="inline-flex items-center text-red-500 hover:text-red-600 mb-8 font-medium">
           ← Quay lại Pokédex
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {/* Phần hình ảnh */}
           <div className="flex flex-col items-center">
-            <div className="relative w-80 h-80 mb-8">
-              <Image
-                src={
-                  pokemon.sprites.other?.["official-artwork"]?.front_default ||
-                  pokemon.sprites.front_default
-                }
-                alt={pokemon.name}
-                fill
-                className="object-contain drop-shadow-2xl"
-                priority
-                sizes="(max-width: 768px) 300px, 400px"
-              />
+            <div className="bg-white rounded-3xl p-8 shadow-md border border-gray-100">
+              <div className="relative w-80 h-80">
+                <Image
+                  src={
+                    pokemon.sprites.other?.["official-artwork"]?.front_default ||
+                    pokemon.sprites.front_default
+                  }
+                  alt={pokemon.name}
+                  fill
+                  className="object-contain drop-shadow-xl"
+                  priority
+                  sizes="(max-width: 768px) 300px, 400px"
+                />
+              </div>
             </div>
 
-            <div className="text-center">
+            <div className="text-center mt-6">
               <p className="text-5xl font-bold text-red-500">
                 #{pokemon.id.toString().padStart(3, "0")}
               </p>
-              <h1 className="text-6xl font-bold capitalize mt-2">
+              <h1 className="text-6xl font-bold capitalize mt-2 text-gray-900">
                 {pokemon.name}
               </h1>
-              <p className="text-xl text-gray-400 mt-1">{genus}</p>
+              <p className="text-xl text-gray-500 mt-1">{genus}</p>
             </div>
 
-            <div className="mt-8">
+            <div className="mt-6">
               <TypeBadge types={pokemon.types} size="medium" />
             </div>
           </div>
 
-          {/* Phần thông tin */}
-          <div className="space-y-10">
-            <div>
-              <h3 className="text-2xl font-semibold mb-3">Mô tả</h3>
-              <p className="text-gray-300 leading-relaxed text-lg">
+          <div className="space-y-8">
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Mô tả</h3>
+              <p className="text-gray-600 leading-relaxed">
                 {flavorText}
               </p>
             </div>
@@ -179,8 +179,8 @@ export default async function PokemonDetailPage({ params }: Props) {
               />
             )}
 
-            <div>
-              <h3 className="text-2xl font-semibold mb-5">Chỉ số cơ bản</h3>
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <h3 className="text-xl font-semibold text-gray-900 mb-5">Chỉ số cơ bản</h3>
               <div className="space-y-4">
                 {stats.map((stat: any) => (
                   <StatBar
@@ -192,23 +192,23 @@ export default async function PokemonDetailPage({ params }: Props) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
-              <div className="bg-gray-900 p-6 rounded-2xl">
-                <p className="text-gray-400 text-sm">Chiều cao</p>
-                <p className="text-3xl font-semibold mt-1">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <p className="text-gray-500 text-sm">Chiều cao</p>
+                <p className="text-3xl font-semibold mt-1 text-gray-900">
                   {pokemon.height / 10} m
                 </p>
               </div>
-              <div className="bg-gray-900 p-6 rounded-2xl">
-                <p className="text-gray-400 text-sm">Cân nặng</p>
-                <p className="text-3xl font-semibold mt-1">
+              <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <p className="text-gray-500 text-sm">Cân nặng</p>
+                <p className="text-3xl font-semibold mt-1 text-gray-900">
                   {pokemon.weight / 10} kg
                 </p>
               </div>
             </div>
 
-            <div>
-              <h3 className="text-2xl font-semibold mb-4">Abilities</h3>
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Abilities</h3>
               <div className="flex flex-wrap gap-3">
                 {abilitiesWithDesc.map((ab, index) => (
                   <AbilityTooltip
@@ -221,10 +221,12 @@ export default async function PokemonDetailPage({ params }: Props) {
               </div>
             </div>
 
-            <TypeDefense
-              types={pokemon.types}
-              damageRelations={damageRelations}
-            />
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <TypeDefense
+                types={pokemon.types}
+                damageRelations={damageRelations}
+              />
+            </div>
           </div>
         </div>
         <MovesList pokemonMoves={pokemon.moves} />

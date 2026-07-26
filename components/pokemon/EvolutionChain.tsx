@@ -11,9 +11,9 @@ interface EvolutionChainProps {
 
 export default function EvolutionChain({ evolutionNames, evolutionIds }: EvolutionChainProps) {
   return (
-    <div>
-      <h3 className="text-2xl font-semibold mb-4">Chuỗi Tiến Hóa</h3>
-      <div className="flex flex-wrap items-center gap-6 bg-gray-900 p-6 rounded-2xl">
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+      <h3 className="text-xl font-semibold text-gray-900 mb-4">Chuỗi Tiến Hóa</h3>
+      <div className="flex flex-wrap items-center gap-6">
         {evolutionNames.map((name, index) => {
           const id = evolutionIds[index] || 0;
           const nameLower = name.toLowerCase();
@@ -24,7 +24,7 @@ export default function EvolutionChain({ evolutionNames, evolutionIds }: Evoluti
                 href={`/pokedex/${name}`}
                 className="group flex flex-col items-center hover:scale-105 transition-transform"
               >
-                <div className="relative w-24 h-24 bg-gray-800 rounded-2xl overflow-hidden border border-gray-700">
+                <div className="relative w-24 h-24 bg-gray-100 rounded-2xl overflow-hidden border border-gray-200">
                   <Image
                     src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`}
                     alt={name}
@@ -37,12 +37,12 @@ export default function EvolutionChain({ evolutionNames, evolutionIds }: Evoluti
                     }}
                   />
                 </div>
-                <p className="text-sm capitalize mt-2 text-gray-300 group-hover:text-white text-center">
+                <p className="text-sm capitalize mt-2 text-gray-600 group-hover:text-gray-900 text-center font-medium">
                   {name}
                 </p>
               </Link>
               {index < evolutionNames.length - 1 && (
-                <span className="text-4xl text-gray-600 mt-6">→</span>
+                <span className="text-4xl text-gray-300 mt-6">→</span>
               )}
             </div>
           );

@@ -56,22 +56,22 @@ export default function TypeDefense({ types, damageRelations }: TypeDefenseProps
   };
 
   const getBgColor = (multi: number) => {
-    if (multi === 0) return 'bg-black text-gray-400';
-    if (multi < 1) return 'bg-red-500/20 text-red-400';
-    if (multi < 1/2) return 'bg-red-700/20 text-red-600'
-    if (multi > 1) return 'bg-green-500/20 text-green-400';
-    if (multi > 2) return 'bg-green-700/20 text-green-600'
-    return 'bg-gray-800 text-gray-300';
+    if (multi === 0) return 'bg-gray-900 text-gray-400';
+    if (multi < 1) return 'bg-red-100 text-red-700';
+    if (multi < 1/2) return 'bg-red-200 text-red-800'
+    if (multi > 1) return 'bg-green-100 text-green-700';
+    if (multi > 2) return 'bg-green-200 text-green-800'
+    return 'bg-gray-100 text-gray-600';
   };
 
   return (
-    <div className="mt-16">
-      <h3 className="text-3xl font-bold mb-2">Type Defenses</h3>
-      <p className="text-gray-400 mb-8">
+    <div>
+      <h3 className="text-xl font-semibold text-gray-900 mb-2">Type Defenses</h3>
+      <p className="text-gray-500 mb-6">
         The effectiveness of each type on {types.map(t => t.type.name).join(" + ")}.
       </p>
 
-      <div className="bg-gray-900 rounded-3xl p-8 border border-gray-700">
+      <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
         <div className="grid grid-cols-9 gap-3 text-center">
           {allTypes.map((type) => {
             const multiplier = getMultiplier(type);

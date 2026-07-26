@@ -47,12 +47,12 @@ export default function PokedexPage() {
   }, [searchTerm, allPokemon]);
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white pb-12">
+    <div className="min-h-screen bg-gray-50 text-gray-800 pb-12">
       <div className="max-w-7xl mx-auto px-6 pt-8">
         <h1 className="text-5xl font-bold text-center text-red-500 mb-2">
           National Pokédex
         </h1>
-        <p className="text-center text-gray-400 mb-10">
+        <p className="text-center text-gray-500 mb-10">
           Tra cứu hơn 1000 Pokémon
         </p>
 
@@ -62,7 +62,7 @@ export default function PokedexPage() {
           <select
             value={selectedGen}
             onChange={(e) => setSelectedGen(Number(e.target.value))}
-            className="bg-gray-900 border border-gray-700 rounded-xl px-6 py-3 text-white">
+            className="bg-white border border-gray-300 rounded-xl px-6 py-3 text-gray-700 focus:outline-none focus:border-red-500">
             {generations.map((gen, i) => (
               <option key={i} value={i}>
                 {gen.name}
@@ -76,7 +76,7 @@ export default function PokedexPage() {
             {[...Array(12)].map((_, i) => (
               <div
                 key={i}
-                className="bg-gray-900 rounded-2xl h-64 animate-pulse"
+                className="bg-gray-200 rounded-2xl h-64 animate-pulse"
               />
             ))}
           </div>
@@ -89,7 +89,7 @@ export default function PokedexPage() {
                   href={`/pokedex/${id}`}
                   key={pokemon.name}
                   className="group">
-                  <div className="bg-gray-900 rounded-3xl p-6 hover:bg-gray-800 transition-all border border-gray-800 hover:border-red-500 h-full flex flex-col items-center">
+                  <div className="bg-white rounded-3xl p-6 hover:shadow-lg transition-all border border-gray-200 hover:border-red-500 h-full flex flex-col items-center shadow-sm">
                     <div className="relative w-32 h-32 mb-4">
                       <Image
                         src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`}
@@ -99,12 +99,10 @@ export default function PokedexPage() {
                         sizes="(max-width: 768px) 100px, 128px"
                       />
                     </div>
-                    <p className="text-xl font-semibold capitalize mb-3">
+                    <p className="text-xl font-semibold capitalize mb-3 text-gray-800">
                       #{id?.padStart(3, "0")} {pokemon.name}
                     </p>
-                    {/* Sử dụng TypeBadge */}
-                    <TypeBadge types={[]} />{" "}
-                    {/* Tạm thời rỗng, sẽ lấy data thật sau */}
+                    <TypeBadge types={[]} />
                   </div>
                 </Link>
               );

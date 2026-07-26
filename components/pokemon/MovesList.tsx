@@ -78,7 +78,7 @@ export default function MovesList({ pokemonMoves }: MovesListProps) {
 
   if (loading) {
     return (
-      <div className="text-center py-12 text-gray-400">
+      <div className="text-center py-12 text-gray-500">
         Đang tải danh sách chiêu thức...
       </div>
     );
@@ -87,7 +87,7 @@ export default function MovesList({ pokemonMoves }: MovesListProps) {
   return (
     <div className="mt-12">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
-        <h3 className="text-3xl font-bold">Danh sách Chiêu Thức</h3>
+        <h3 className="text-2xl font-bold text-gray-900">Danh sách Chiêu Thức</h3>
 
         <div className="flex gap-4">
           <input
@@ -95,13 +95,13 @@ export default function MovesList({ pokemonMoves }: MovesListProps) {
             placeholder="Tìm chiêu thức..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-gray-900 border border-gray-700 rounded-xl px-5 py-3 w-72 focus:outline-none focus:border-red-500"
+            className="bg-white border border-gray-300 rounded-xl px-5 py-3 w-72 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 text-gray-900 placeholder-gray-400"
           />
 
           <select
             value={filterMethod}
             onChange={(e) => setFilterMethod(e.target.value)}
-            className="bg-gray-900 border border-gray-700 rounded-xl px-5 py-3">
+            className="bg-white border border-gray-300 rounded-xl px-5 py-3 text-gray-700 focus:outline-none focus:border-red-500">
             <option value="all">Tất cả cách học</option>
             <option value="level-up">Level Up</option>
             <option value="machine">TM/HM</option>
@@ -111,53 +111,53 @@ export default function MovesList({ pokemonMoves }: MovesListProps) {
         </div>
       </div>
 
-      <div className="bg-gray-900 rounded-3xl overflow-hidden border border-gray-700">
+      <div className="bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-sm">
         <table className="w-full">
-          <thead className="bg-gray-800 sticky top-0">
+          <thead className="bg-gray-50 sticky top-0">
             <tr>
-              <th className="p-5 text-left font-semibold">Chiêu Thức</th>
-              <th className="p-5 text-left font-semibold">Hệ</th>
-              <th className="p-5 text-center font-semibold">Power</th>
-              <th className="p-5 text-center font-semibold">Accuracy</th>
-              <th className="p-5 text-center font-semibold">PP</th>
-              <th className="p-5 text-left font-semibold">Loại</th>
-              <th className="p-5 text-left font-semibold">Cách Học</th>
-              <th className="p-5 text-left font-semibold">Hiệu Ứng</th>
+              <th className="p-5 text-left font-semibold text-gray-700">Chiêu Thức</th>
+              <th className="p-5 text-left font-semibold text-gray-700">Hệ</th>
+              <th className="p-5 text-center font-semibold text-gray-700">Power</th>
+              <th className="p-5 text-center font-semibold text-gray-700">Accuracy</th>
+              <th className="p-5 text-center font-semibold text-gray-700">PP</th>
+              <th className="p-5 text-left font-semibold text-gray-700">Loại</th>
+              <th className="p-5 text-left font-semibold text-gray-700">Cách Học</th>
+              <th className="p-5 text-left font-semibold text-gray-700">Hiệu Ứng</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-800">
+          <tbody className="divide-y divide-gray-100">
             {filteredMoves.map((move, index) => (
               <tr
                 key={index}
-                className="hover:bg-gray-800/70 transition-colors">
-                <td className="p-5 font-medium capitalize">{move.name}</td>
+                className="hover:bg-gray-50 transition-colors">
+                <td className="p-5 font-medium capitalize text-gray-900">{move.name}</td>
                 <td className="p-5">
                   <TypeBadge
                     types={[{ type: { name: move.type } }]}
                     size="small"
                   />
                 </td>
-                <td className="p-5 text-center font-mono font-bold">
+                <td className="p-5 text-center font-mono font-bold text-gray-800">
                   {move.power || "-"}
                 </td>
-                <td className="p-5 text-center font-mono">
+                <td className="p-5 text-center font-mono text-gray-600">
                   {move.accuracy ? `${move.accuracy}%` : "-"}
                 </td>
-                <td className="p-5 text-center font-mono">{move.pp}</td>
-                <td className="p-5 capitalize">{move.damageClass}</td>
+                <td className="p-5 text-center font-mono text-gray-600">{move.pp}</td>
+                <td className="p-5 capitalize text-gray-700">{move.damageClass}</td>
                 <td className="p-5">
                   <span
-                    className={`px-3 py-1 rounded-full text-xs capitalize
-                    ${move.method === "level-up" ? "bg-green-500/20 text-green-400" : ""}
-                    ${move.method === "machine" ? "bg-blue-500/20 text-blue-400" : ""}
-                    ${move.method === "egg" ? "bg-purple-500/20 text-purple-400" : ""}
+                    className={`px-3 py-1 rounded-full text-xs capitalize font-medium
+                    ${move.method === "level-up" ? "bg-green-100 text-green-700" : ""}
+                    ${move.method === "machine" ? "bg-blue-100 text-blue-700" : ""}
+                    ${move.method === "egg" ? "bg-purple-100 text-purple-700" : ""}
                   `}>
                     {move.method === "level-up"
                       ? `Level ${move.level}`
                       : move.method}
                   </span>
                 </td>
-                <td className="p-5 text-sm text-gray-300 max-w-md">
+                <td className="p-5 text-sm text-gray-600 max-w-md">
                   {move.effect}
                 </td>
               </tr>
@@ -167,7 +167,7 @@ export default function MovesList({ pokemonMoves }: MovesListProps) {
       </div>
 
       {filteredMoves.length === 0 && (
-        <p className="text-center text-gray-500 py-8">
+        <p className="text-center text-gray-400 py-8">
           Không tìm thấy chiêu thức nào phù hợp.
         </p>
       )}
