@@ -1,0 +1,595 @@
+.page {
+  min-height: 100vh;
+  background: #f9fafb;
+  padding-bottom: 3rem;
+}
+
+.inner {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 0;
+}
+
+.title {
+  font-size: 3rem;
+  font-weight: 700;
+  text-align: center;
+  color: #dc2626;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 2rem;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+}
+
+.tab {
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.75rem 0.75rem 0 0;
+  background: #e5e7eb;
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  background: #d1d5db;
+}
+
+.tabActive {
+  background: #dc2626;
+  color: #fff;
+}
+
+.tabAdd {
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem 0.75rem 0 0;
+  background: transparent;
+  color: #9ca3af;
+  font-size: 1.25rem;
+  cursor: pointer;
+  border: 2px dashed #d1d5db;
+  border-bottom: none;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.tabAdd:hover {
+  color: #dc2626;
+  border-color: #dc2626;
+}
+
+/* Team header */
+.teamHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.teamNameInput {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  color: #111827;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.teamNameInput:focus {
+  border-color: #dc2626;
+}
+
+/* Slot grid */
+.slotGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .slotGrid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.slot {
+  background: #fff;
+  border: 2px solid #e5e7eb;
+  border-radius: 1rem;
+  padding: 1rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+  position: relative;
+  min-height: 10rem;
+}
+
+.slot:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  border-color: #dc2626;
+}
+
+.slotNumber {
+  position: absolute;
+  top: 0.25rem;
+  left: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #9ca3af;
+}
+
+.slotSprite {
+  position: relative;
+  width: 5rem;
+  height: 5rem;
+  margin-bottom: 0.25rem;
+}
+
+.slotSprite img {
+  object-fit: contain;
+}
+
+.slotEmpty {
+  font-size: 2rem;
+  color: #d1d5db;
+  margin-bottom: 0.25rem;
+  line-height: 5rem;
+}
+
+.slotName {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1f2937;
+  text-transform: capitalize;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slotEmptyLabel {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  margin-top: auto;
+}
+
+.slotMoves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem;
+  margin-top: 0.25rem;
+  justify-content: center;
+}
+
+.slotMove {
+  font-size: 0.55rem;
+  background: #f3f4f6;
+  color: #6b7280;
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.25rem;
+  max-width: 4.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slotReveal {
+  font-size: 0.6rem;
+  color: #9ca3af;
+  margin-top: auto;
+}
+
+.slotReorder {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.slotReorder button {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.7rem;
+  color: #6b7280;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.slotReorder button:hover {
+  background: #dc2626;
+  color: #fff;
+  border-color: #dc2626;
+}
+
+/* Action buttons */
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.btnPrimary {
+  padding: 0.6rem 2rem;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btnPrimary:hover {
+  background: #b91c1c;
+}
+
+.btnPrimary:disabled {
+  background: #f87171;
+  cursor: not-allowed;
+}
+
+.btnDanger {
+  padding: 0.6rem 2rem;
+  background: #fff;
+  color: #dc2626;
+  border: 2px solid #dc2626;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btnDanger:hover {
+  background: #dc2626;
+  color: #fff;
+}
+
+/* Modal overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 1rem;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 1.5rem;
+  width: 100%;
+  max-width: 36rem;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modalTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+/* Search in modal */
+.pokemonSearchInput {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.75rem;
+  font-size: 0.95rem;
+  color: #111827;
+  outline: none;
+  margin-bottom: 0.75rem;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.pokemonSearchInput:focus {
+  border-color: #dc2626;
+}
+
+.pokemonResults {
+  max-height: 16rem;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+}
+
+.pokemonResult {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.pokemonResult:hover {
+  background: #f3f4f6;
+}
+
+.pokemonResult.selected {
+  background: #fef2f2;
+}
+
+.pokemonResultSprite {
+  position: relative;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+}
+
+.pokemonResultId {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-weight: 600;
+  min-width: 2.5rem;
+}
+
+.pokemonResultName {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1f2937;
+  text-transform: capitalize;
+}
+
+/* Form in configure step */
+.formGroup {
+  margin-bottom: 1rem;
+}
+
+.formLabel {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.35rem;
+}
+
+.formSelect {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.75rem;
+  font-size: 0.9rem;
+  color: #111827;
+  outline: none;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.formSelect:focus {
+  border-color: #dc2626;
+}
+
+.moveSearchInput {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.75rem;
+  font-size: 0.85rem;
+  color: #111827;
+  outline: none;
+  margin-bottom: 0.5rem;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.moveSearchInput:focus {
+  border-color: #dc2626;
+}
+
+.moveList {
+  max-height: 12rem;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+}
+
+.moveItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+  color: #374151;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.moveItem:hover {
+  background: #f3f4f6;
+}
+
+.moveItem input[type="checkbox"] {
+  accent-color: #dc2626;
+}
+
+.moveItemName {
+  text-transform: capitalize;
+}
+
+.moveItem.selected {
+  background: #fef2f2;
+}
+
+.moveCount {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.selectedPokemonInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.selectedPokemonInfo:hover {
+  background: #f3f4f6;
+}
+
+.selectedPokemonInfo img {
+  object-fit: contain;
+}
+
+.selectedPokemonInfo span {
+  font-weight: 600;
+  text-transform: capitalize;
+  color: #1f2937;
+}
+
+.changeLink {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: #dc2626;
+  font-weight: 500;
+}
+
+/* Modal buttons */
+.modalActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btnCancel {
+  padding: 0.5rem 1.5rem;
+  background: #fff;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  border-radius: 9999px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btnCancel:hover {
+  background: #f3f4f6;
+}
+
+.btnConfirm {
+  padding: 0.5rem 1.5rem;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btnConfirm:hover {
+  background: #b91c1c;
+}
+
+.btnConfirm:disabled {
+  background: #f87171;
+  cursor: not-allowed;
+}
+
+/* Unauthorized / Empty states */
+.messageBox {
+  text-align: center;
+  padding: 4rem 1rem;
+}
+
+.messageTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.75rem;
+}
+
+.messageText {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+.loginLink {
+  display: inline-block;
+  padding: 0.6rem 2rem;
+  background: #dc2626;
+  color: #fff;
+  border-radius: 9999px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.loginLink:hover {
+  background: #b91c1c;
+}
+
+.loader {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 4px solid #e5e7eb;
+  border-top-color: #dc2626;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 3rem auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.emptyAction {
+  display: inline-block;
+  padding: 0.6rem 2rem;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.emptyAction:hover {
+  background: #b91c1c;
+}
