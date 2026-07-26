@@ -53,7 +53,6 @@ export default function RegisterPage() {
       if (!res.ok) {
         setErrors({ general: data.error });
       } else {
-        alert("Đăng ký thành công!");
         router.push("/auth/signin");
       }
     } catch {
@@ -72,8 +71,64 @@ export default function RegisterPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Các field username, email, name, password, confirmPassword giống trước */}
-          {/* ... (giữ nguyên code field cũ, chỉ thêm error hiển thị) */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Username</label>
+            <input
+              type="text"
+              value={formData.username}
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-red-500 text-white"
+              placeholder="TrainerName"
+            />
+            {errors.username && <p className="text-red-400 text-sm mt-1">{errors.username}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-red-500 text-white"
+              placeholder="your@email.com"
+            />
+            {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Tên hiển thị</label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-red-500 text-white"
+              placeholder="(tuỳ chọn)"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Mật khẩu</label>
+            <input
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-red-500 text-white"
+              placeholder="••••••••"
+            />
+            {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Xác nhận mật khẩu</label>
+            <input
+              type="password"
+              value={formData.confirmPassword}
+              onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-red-500 text-white"
+              placeholder="••••••••"
+            />
+            {errors.confirmPassword && <p className="text-red-400 text-sm mt-1">{errors.confirmPassword}</p>}
+          </div>
 
           {errors.general && <p className="text-red-500 text-center">{errors.general}</p>}
 

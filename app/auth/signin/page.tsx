@@ -3,16 +3,20 @@
 
 import { signIn } from "next-auth/react";
 import { useState } from "react";
-import Link from "next/link"; // Thêm dòng này
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function SignInPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
 
     const result = await signIn("credentials", {
       email,
@@ -21,10 +25,9 @@ export default function SignInPage() {
     });
 
     if (result?.error) {
-      alert("Đăng nhập thất bại: " + result.error);
+      setError("Email hoặc mật khẩu không đúng");
     } else {
-      alert("Đăng nhập thành công!");
-      window.location.href = "/";
+      router.push("/");
     }
     setIsLoading(false);
   };
@@ -58,6 +61,8 @@ export default function SignInPage() {
               required
             />
           </div>
+
+          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
 
           <button
             type="submit"
