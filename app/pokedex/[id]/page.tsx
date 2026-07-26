@@ -66,11 +66,12 @@ export default async function PokemonDetailPage({ params }: Props) {
       const effectEntry =
         detail?.effect_entries?.find((e: any) => e.language.name === "vi") ||
         detail?.effect_entries?.find((e: any) => e.language.name === "en");
+      const rawEffect = effectEntry?.short_effect || "";
 
       return {
         name: ab.ability.name,
         isHidden: ab.is_hidden,
-        effect: effectEntry?.short_effect || "Không có mô tả.",
+        effect: rawEffect || "Không có mô tả.",
       };
     });
 

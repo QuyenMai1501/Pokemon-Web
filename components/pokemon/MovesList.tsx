@@ -36,6 +36,15 @@ export default function MovesList({ pokemonMoves }: MovesListProps) {
         const detail = await getMoveDetail(m.move.url);
         if (detail) {
           const versionDetail = m.version_group_details[0] || {};
+          const effectEntry =
+            detail.effect_entries?.find(
+              (e: { language: { name: string }; short_effect: string }) => e.language.name === "vi",
+            ) ||
+            detail.effect_entries?.find(
+              (e: { language: { name: string }; short_effect: string }) => e.language.name === "en",
+            );
+          const rawEffect = effectEntry?.short_effect || "";
+
           detailedMoves.push({
             name: detail.name.replace(/-/g, " "),
             type: detail.type.name,
@@ -43,8 +52,7 @@ export default function MovesList({ pokemonMoves }: MovesListProps) {
             accuracy: detail.accuracy,
             pp: detail.pp,
             damageClass: detail.damage_class?.name || "status",
-            effect:
-              detail.effect_entries?.[0]?.short_effect || "Không có mô tả",
+            effect: rawEffect || "Không có mô tả",
             level: versionDetail.level_learned_at || 0,
             method: versionDetail.move_learn_method?.name || "level-up",
           });

@@ -36,10 +36,11 @@ export async function POST(req: NextRequest) {
       const effectEntry =
         detail.effect_entries?.find((e) => e.language.name === "vi") ||
         detail.effect_entries?.find((e) => e.language.name === "en");
+      const rawEffect = effectEntry?.short_effect || "";
 
       return {
         name: detail.name,
-        effect: effectEntry?.short_effect || "Không có mô tả.",
+        effect: rawEffect || "Không có mô tả.",
       };
     });
 
