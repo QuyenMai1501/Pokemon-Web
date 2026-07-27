@@ -7,6 +7,21 @@ import Link from "next/link";
 import { getPokemonList, getPokemonDetail } from "@/lib/pokeApi";
 import styles from "./page.module.css";
 
+const typeColors: Record<string, string> = {
+  normal: "#9ca3af", fire: "#ef4444", water: "#3b82f6", grass: "#22c55e",
+  electric: "#eab308", ice: "#67e8f9", fighting: "#c2410c", poison: "#9333ea",
+  ground: "#b45309", flying: "#7dd3fc", psychic: "#ec4899", bug: "#65a30d",
+  rock: "#ca8a04", ghost: "#6d28d9", dragon: "#7c3aed", dark: "#1f2937",
+  steel: "#94a3b8", fairy: "#f9a8d4",
+};
+const textColors: Record<string, string> = {
+  normal: "#000", fire: "#fff", water: "#fff", grass: "#fff",
+  electric: "#000", ice: "#000", fighting: "#fff", poison: "#fff",
+  ground: "#fff", flying: "#000", psychic: "#fff", bug: "#fff",
+  rock: "#fff", ghost: "#fff", dragon: "#fff", dark: "#fff",
+  steel: "#000", fairy: "#000",
+};
+
 interface PokemonSlot {
   pokemonId: number | null;
   nickname: string;
@@ -27,9 +42,24 @@ interface PokemonEntry {
   id: number;
 }
 
+interface MoveDetail {
+  type: string;
+  power: number | null;
+  accuracy: number | null;
+  pp: number;
+}
+
+interface ItemEntry {
+  name: string;
+  sprite: string;
+  effect: string;
+}
+
 interface PokemonCacheEntry {
-  abilities: string[];
-  moves: string[];
+  abilityNames: string[];
+  abilityUrls: string[];
+  moveNames: string[];
+  moveUrls: string[];
   sprite: string;
 }
 
@@ -40,6 +70,34 @@ const NATURES = [
   "Modest", "Mild", "Quiet", "Bashful", "Rash",
   "Calm", "Gentle", "Sassy", "Careful", "Quirky",
 ];
+
+const NATURE_DESCRIPTIONS: Record<string, string> = {
+  Hardy: "—",
+  Lonely: "Tấn công +, Phòng thủ -",
+  Brave: "Tấn công +, Tốc độ -",
+  Adamant: "Tấn công +, Sp. Tấn công -",
+  Naughty: "Tấn công +, Sp. Phòng thủ -",
+  Bold: "Phòng thủ +, Tấn công -",
+  Docile: "—",
+  Relaxed: "Phòng thủ +, Tốc độ -",
+  Impish: "Phòng thủ +, Sp. Tấn công -",
+  Lax: "Phòng thủ +, Sp. Phòng thủ -",
+  Timid: "Tốc độ +, Tấn công -",
+  Hasty: "Tốc độ +, Phòng thủ -",
+  Serious: "—",
+  Jolly: "Tốc độ +, Sp. Tấn công -",
+  Naive: "Tốc độ +, Sp. Phòng thủ -",
+  Modest: "Sp. Tấn công +, Tấn công -",
+  Mild: "Sp. Tấn công +, Phòng thủ -",
+  Quiet: "Sp. Tấn công +, Tốc độ -",
+  Bashful: "—",
+  Rash: "Sp. Tấn công +, Sp. Phòng thủ -",
+  Calm: "Sp. Phòng thủ +, Tấn công -",
+  Gentle: "Sp. Phòng thủ +, Phòng thủ -",
+  Sassy: "Sp. Phòng thủ +, Tốc độ -",
+  Careful: "Sp. Phòng thủ +, Sp. Tấn công -",
+  Quirky: "—",
+};
 
 function emptySlots(): PokemonSlot[] {
   return Array.from({ length: 6 }, () => ({
@@ -81,14 +139,22 @@ export default function TeamBuilderPage() {
   const [modalAbilities, setModalAbilities] = useState<string[]>([]);
   const [modalAllMoves, setModalAllMoves] = useState<string[]>([]);
   const [modalAbility, setModalAbility] = useState("");
-  const [modalItem, setModalItem] = useState("");
   const [modalMoves, setModalMoves] = useState<string[]>([]);
   const [modalMoveSearch, setModalMoveSearch] = useState("");
   const [modalNature, setModalNature] = useState("");
 
   const [allPokemonList, setAllPokemonList] = useState<PokemonEntry[]>([]);
-  const [itemsList, setItemsList] = useState<{ name: string }[]>([]);
+  const [itemsList, setItemsList] = useState<ItemEntry[]>([]);
   const [pokemonCache, setPokemonCache] = useState<Record<number, PokemonCacheEntry>>({});
+
+  const [moveDetails, setMoveDetails] = useState<Record<string, MoveDetail>>({});
+  const [abilityEffects, setAbilityEffects] = useState<Record<string, string>>({});
+  const [hoveredAbility, setHoveredAbility] = useState<string | null>(null);
+  const [hoveredMove, setHoveredMove] = useState<string | null>(null);
+  const [hoveredNature, setHoveredNature] = useState<string | null>(null);
+  const [tooltip, setTooltip] = useState<{ text: string; x: number; y: number } | null>(null);
+  const [itemPickerSlot, setItemPickerSlot] = useState<number | null>(null);
+  const [itemPickerSearch, setItemPickerSearch] = useState("");
 
   useEffect(() => {
     if (status !== "authenticated") {
@@ -138,30 +204,74 @@ export default function TeamBuilderPage() {
     if (!modalPokemonId) return;
     if (pokemonCache[modalPokemonId]) {
       const c = pokemonCache[modalPokemonId];
-      setModalAbilities(c.abilities);
-      setModalAllMoves(c.moves);
+      setModalAbilities(c.abilityNames);
+      setModalAllMoves(c.moveNames);
       return;
     }
     let cancelled = false;
     getPokemonDetail(modalPokemonId)
-      .then((detail) => {
+      .then(async (detail) => {
         if (cancelled) return;
-        const abilities = detail.abilities.map((a: any) => a.ability.name);
-        const moves = detail.moves.map((m: any) => m.move.name).sort();
+
+        const abilities = detail.abilities.map((a: any) => ({ name: a.ability.name, url: a.ability.url }));
+        const moveEntries = detail.moves.map((m: any) => ({ name: m.move.name, url: m.move.url }));
+        moveEntries.sort((a: any, b: any) => a.name.localeCompare(b.name));
+
+        const abilityNames = abilities.map((a: any) => a.name);
+        const abilityUrls = abilities.map((a: any) => a.url);
+        const moveNames = moveEntries.map((m: any) => m.name);
+        const moveUrls = moveEntries.map((m: any) => m.url);
+
         setPokemonCache((prev) => ({
           ...prev,
-          [modalPokemonId]: { abilities, moves, sprite: detail.sprites.front_default },
+          [modalPokemonId]: { abilityNames, abilityUrls, moveNames, moveUrls, sprite: detail.sprites.front_default },
         }));
+
         if (!cancelled) {
-          setModalAbilities(abilities);
-          setModalAllMoves(moves);
+          setModalAbilities(abilityNames);
+          setModalAllMoves(moveNames);
+
+          const effects: Record<string, string> = {};
+          const abilityResults = await Promise.allSettled(
+            abilityUrls.map((url: string) =>
+              fetch(url).then((r) => r.json()).then((data) => {
+                const entry = data.effect_entries?.find((e: any) => e.language.name === "vi") ||
+                  data.effect_entries?.find((e: any) => e.language.name === "en");
+                return { name: data.name, effect: entry?.short_effect || "Không có mô tả." };
+              }),
+            ),
+          );
+          abilityResults.forEach((r) => {
+            if (r.status === "fulfilled" && r.value) {
+              effects[r.value.name] = r.value.effect;
+            }
+          });
+          if (!cancelled) setAbilityEffects((prev) => ({ ...prev, ...effects }));
+
+          const moveMap: Record<string, MoveDetail> = {};
+          const moveResults = await Promise.allSettled(
+            moveUrls.map((url: string) =>
+              fetch(url).then((r) => r.json()).then((data) => ({
+                name: data.name,
+                type: data.type?.name || "normal",
+                power: data.power,
+                accuracy: data.accuracy,
+                pp: data.pp,
+              })),
+            ),
+          );
+          moveResults.forEach((r) => {
+            if (r.status === "fulfilled" && r.value) {
+              const { name, ...rest } = r.value;
+              moveMap[name] = rest;
+            }
+          });
+          if (!cancelled) setMoveDetails((prev) => ({ ...prev, ...moveMap }));
         }
       })
       .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [modalPokemonId, pokemonCache]);
+    return () => { cancelled = true; };
+  }, [modalPokemonId]);
 
   const filteredPokemon = useMemo(() => {
     if (!modalPokemonSearch) return [];
@@ -180,6 +290,12 @@ export default function TeamBuilderPage() {
     const term = modalMoveSearch.toLowerCase();
     return modalAllMoves.filter((m) => m.includes(term));
   }, [modalMoveSearch, modalAllMoves]);
+
+  const filteredPickerItems = useMemo(() => {
+    if (!itemPickerSearch) return itemsList;
+    const term = itemPickerSearch.toLowerCase();
+    return itemsList.filter((item) => item.name.toLowerCase().includes(term));
+  }, [itemPickerSearch, itemsList]);
 
   const handleCreateTeam = async () => {
     if (teams.length >= 4) return;
@@ -282,7 +398,6 @@ export default function TeamBuilderPage() {
     setModalPokemonSearch("");
     setModalPokemonId(slot.pokemonId);
     setModalAbility(slot.ability || "");
-    setModalItem(slot.heldItem || "");
     setModalMoves([...slot.moves]);
     setModalMoveSearch("");
     setModalNature(slot.nature || "");
@@ -298,7 +413,7 @@ export default function TeamBuilderPage() {
         pokemonId: modalPokemonId,
         nickname: "",
         ability: modalAbility || null,
-        heldItem: modalItem || null,
+        heldItem: next[editingSlotIdx].heldItem,
         moves: modalMoves,
         nature: modalNature || null,
       };
@@ -331,6 +446,28 @@ export default function TeamBuilderPage() {
       [next[idx], next[target]] = [next[target], next[idx]];
       return next;
     });
+  };
+
+  const handleItemSelect = (itemName: string) => {
+    if (itemPickerSlot === null) return;
+    setDraftSlots((prev) => {
+      const next = [...prev];
+      next[itemPickerSlot] = { ...next[itemPickerSlot], heldItem: itemName };
+      return next;
+    });
+    setItemPickerSlot(null);
+    setItemPickerSearch("");
+  };
+
+  const handleRemoveItem = () => {
+    if (itemPickerSlot === null) return;
+    setDraftSlots((prev) => {
+      const next = [...prev];
+      next[itemPickerSlot] = { ...next[itemPickerSlot], heldItem: null };
+      return next;
+    });
+    setItemPickerSlot(null);
+    setItemPickerSearch("");
   };
 
   if (status === "loading" || loading) {
@@ -425,6 +562,7 @@ export default function TeamBuilderPage() {
             const name = slot.pokemonId
               ? allPokemonList.find((p) => p.id === slot.pokemonId)?.name
               : null;
+            const item = slot.heldItem ? itemsList.find((it) => it.name === slot.heldItem) : null;
             return (
               <div
                 key={i}
@@ -459,13 +597,34 @@ export default function TeamBuilderPage() {
 
                 {slot.moves.length > 0 && (
                   <div className={styles.slotMoves}>
-                    {slot.moves.map((m) => (
-                      <span key={m} className={styles.slotMove}>
-                        {m.replace(/-/g, " ")}
-                      </span>
-                    ))}
+                    {slot.moves.map((m) => {
+                      const md = moveDetails[m];
+                      return (
+                        <span
+                          key={m}
+                          className={styles.slotMove}
+                          style={md ? { backgroundColor: typeColors[md.type] + "22", color: typeColors[md.type], borderColor: typeColors[md.type] } : undefined}
+                        >
+                          {m.replace(/-/g, " ")}
+                        </span>
+                      );
+                    })}
                   </div>
                 )}
+
+                <div className={styles.slotItemArea}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setItemPickerSlot(i);
+                    setItemPickerSearch("");
+                  }}
+                >
+                  {item?.sprite ? (
+                    <Image src={item.sprite} alt="" width={22} height={22} style={{ objectFit: "contain" }} />
+                  ) : (
+                    <span className={styles.slotItemPlus}>+</span>
+                  )}
+                </div>
 
                 {!slot.pokemonId && (
                   <span className={styles.slotReveal}>Nhấn để chọn</span>
@@ -582,34 +741,34 @@ export default function TeamBuilderPage() {
                 <>
                   <div className={styles.formGroup}>
                     <label className={styles.formLabel}>Ability</label>
-                    <select
-                      className={styles.formSelect}
-                      value={modalAbility}
-                      onChange={(e) => setModalAbility(e.target.value)}
-                    >
-                      <option value="">-- Chọn ability --</option>
+                    <div className={styles.abilityList}>
                       {modalAbilities.map((a) => (
-                        <option key={a} value={a}>
-                          {a.replace(/-/g, " ")}
-                        </option>
+                        <div
+                          key={a}
+                          className={`${styles.abilityItem} ${modalAbility === a ? styles.abilitySelected : ""}`}
+                          onClick={() => setModalAbility(a)}
+                          onMouseEnter={(e) => {
+                            setHoveredAbility(a);
+                            if (abilityEffects[a]) {
+                              const r = e.currentTarget.getBoundingClientRect();
+                              setTooltip({ text: abilityEffects[a], x: r.right + 10, y: r.top + r.height / 2 });
+                            }
+                          }}
+                          onMouseLeave={() => {
+                            setHoveredAbility(null);
+                            setTooltip(null);
+                          }}
+                        >
+                          <span className={styles.abilityDot} />
+                          <span className={styles.abilityName}>
+                            {a.replace(/-/g, " ")}
+                          </span>
+                        </div>
                       ))}
-                    </select>
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label className={styles.formLabel}>Item</label>
-                    <select
-                      className={styles.formSelect}
-                      value={modalItem}
-                      onChange={(e) => setModalItem(e.target.value)}
-                    >
-                      <option value="">-- Không có item --</option>
-                      {itemsList.map((item) => (
-                        <option key={item.name} value={item.name}>
-                          {item.name.replace(/-/g, " ")}
-                        </option>
-                      ))}
-                    </select>
+                      {modalAbilities.length === 0 && (
+                        <p className={styles.loadingText}>Đang tải...</p>
+                      )}
+                    </div>
                   </div>
 
                   <div className={styles.formGroup}>
@@ -624,22 +783,38 @@ export default function TeamBuilderPage() {
                     />
                     {modalAllMoves.length > 0 && (
                       <div className={styles.moveList}>
-                        {filteredMoves.map((move) => (
-                          <div
-                            key={move}
-                            className={`${styles.moveItem} ${modalMoves.includes(move) ? styles.selected : ""}`}
-                            onClick={() => toggleMove(move)}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={modalMoves.includes(move)}
-                              onChange={() => toggleMove(move)}
-                            />
-                            <span className={styles.moveItemName}>
-                              {move.replace(/-/g, " ")}
-                            </span>
-                          </div>
-                        ))}
+                        {filteredMoves.map((move) => {
+                          const md = moveDetails[move];
+                          return (
+                            <div
+                              key={move}
+                              className={`${styles.moveItem} ${modalMoves.includes(move) ? styles.selected : ""}`}
+                              onClick={() => toggleMove(move)}
+                              onMouseEnter={() => setHoveredMove(move)}
+                              onMouseLeave={() => setHoveredMove(null)}
+                            >
+                              {md && (
+                                <span
+                                  className={styles.moveTypeBadge}
+                                  style={{
+                                    backgroundColor: typeColors[md.type] || "#6b7280",
+                                    color: textColors[md.type] || "#fff",
+                                  }}
+                                >
+                                  {md.type}
+                                </span>
+                              )}
+                              <span className={styles.moveItemName}>
+                                {move.replace(/-/g, " ")}
+                              </span>
+                              {hoveredMove === move && md && (
+                                <span className={styles.moveTooltip}>
+                                  Power: {md.power ?? "-"} | Acc: {md.accuracy != null ? `${md.accuracy}%` : "-"} | PP: {md.pp}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
                         {filteredMoves.length === 0 && (
                           <div
                             style={{
@@ -660,18 +835,27 @@ export default function TeamBuilderPage() {
 
                   <div className={styles.formGroup}>
                     <label className={styles.formLabel}>Nature</label>
-                    <select
-                      className={styles.formSelect}
-                      value={modalNature}
-                      onChange={(e) => setModalNature(e.target.value)}
-                    >
-                      <option value="">-- Chọn nature --</option>
+                    <div className={styles.natureGrid}>
                       {NATURES.map((n) => (
-                        <option key={n} value={n}>
-                          {n}
-                        </option>
+                        <div
+                          key={n}
+                          className={`${styles.natureItem} ${modalNature === n ? styles.natureSelected : ""}`}
+                          onClick={() => setModalNature(modalNature === n ? "" : n)}
+                          onMouseEnter={(e) => {
+                            setHoveredNature(n);
+                            const r = e.currentTarget.getBoundingClientRect();
+                            setTooltip({ text: NATURE_DESCRIPTIONS[n], x: r.right + 10, y: r.top + r.height / 2 });
+                          }}
+                          onMouseLeave={() => {
+                            setHoveredNature(null);
+                            setTooltip(null);
+                          }}
+                        >
+                          <span className={styles.natureDot} />
+                          <span className={styles.natureName}>{n}</span>
+                        </div>
                       ))}
-                    </select>
+                    </div>
                   </div>
                 </>
               )}
@@ -689,6 +873,72 @@ export default function TeamBuilderPage() {
                   disabled={!modalPokemonId}
                 >
                   Xong
+                </button>
+              </div>
+            </div>
+            {tooltip && (
+              <div
+                className={styles.globalTooltip}
+                style={{ left: tooltip.x, top: tooltip.y }}
+              >
+                {tooltip.text}
+              </div>
+            )}
+          </div>
+        )}
+
+        {itemPickerSlot !== null && (
+          <div
+            className={styles.overlay}
+            onClick={() => { setItemPickerSlot(null); setItemPickerSearch(""); }}
+          >
+            <div
+              className={styles.itemPicker}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className={styles.itemPickerTitle}>Chọn vật phẩm</h3>
+              <input
+                className={styles.itemPickerInput}
+                placeholder="Tìm vật phẩm..."
+                value={itemPickerSearch}
+                onChange={(e) => setItemPickerSearch(e.target.value)}
+                autoFocus
+              />
+              <div className={styles.itemPickerGrid}>
+                {filteredPickerItems.map((item) => (
+                  <div
+                    key={item.name}
+                    className={styles.itemPickerItem}
+                    onClick={() => handleItemSelect(item.name)}
+                  >
+                    <div className={styles.itemPickerSprite}>
+                      {item.sprite ? (
+                        <Image src={item.sprite} alt="" fill sizes="36px" style={{ objectFit: "contain" }} />
+                      ) : (
+                        <span>?</span>
+                      )}
+                    </div>
+                    <span className={styles.itemPickerName}>
+                      {item.name.replace(/-/g, " ")}
+                    </span>
+                  </div>
+                ))}
+                {filteredPickerItems.length === 0 && (
+                  <p className={styles.itemPickerEmpty}>Không tìm thấy vật phẩm.</p>
+                )}
+              </div>
+              <div className={styles.itemPickerActions}>
+                <button
+                  className={styles.btnDanger}
+                  onClick={handleRemoveItem}
+                >
+                  Bỏ vật phẩm
+                </button>
+                <button
+                  className={styles.btnCancel}
+                  onClick={() => { setItemPickerSlot(null); setItemPickerSearch(""); }}
+                >
+                  Đóng
                 </button>
               </div>
             </div>
