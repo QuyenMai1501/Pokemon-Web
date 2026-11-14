@@ -20,6 +20,45 @@
   gap: 1.5rem;
 }
 
+.stages {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.stage {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.stageItems {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.formGroup {
+  margin-top: 1.5rem;
+  border-top: 1px solid #f3f4f6;
+  padding-top: 1rem;
+}
+
+.formTitle {
+  margin: 0 0 0.75rem;
+  color: #374151;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.formList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
 .item {
   display: flex;
   align-items: center;

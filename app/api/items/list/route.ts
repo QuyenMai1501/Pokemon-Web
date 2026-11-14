@@ -14,7 +14,30 @@ const BATTLE_CATEGORIES = [
   "training",
   "jewels",
   "effort-training",
+  "type-protection",
+  "mega-stones",
+  "z-crystals",
+  "memories",
+  "nature-mints",
+  "stat-boosts",
 ];
+
+const SPRITE_BASE = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items";
+
+async function resolveSprite(name: string, defaultSprite: string | null): Promise<string> {
+  if (defaultSprite) return defaultSprite;
+
+  for (const folder of ["gen9", "gen8"]) {
+    const url = `${SPRITE_BASE}/${folder}/${name}.png`;
+    try {
+      const res = await fetch(url, { method: "HEAD" });
+      if (res.ok) return url;
+    } catch {
+      continue;
+    }
+  }
+  return "";
+}
 
 async function fetchJSON(url: string) {
   const res = await fetch(url, { next: { revalidate: 86400 } });
@@ -63,9 +86,11 @@ export async function GET() {
       data.effect_entries?.find((e: any) => e.language.name === "vi") ||
       data.effect_entries?.find((e: any) => e.language.name === "en");
 
+    const sprite = await resolveSprite(data.name, data.sprites?.default ?? null);
+
     return {
       name: data.name,
-      sprite: data.sprites?.default ?? "",
+      sprite,
       effect: (effectEntry?.short_effect ?? effectEntry?.effect ?? "").replace(/\f/g, " ").trim(),
       category: data.category?.name ?? "",
     };

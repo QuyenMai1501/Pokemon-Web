@@ -5,7 +5,7 @@
 }
 
 .inner {
-  max-width: 48rem;
+  max-width: 56rem;
   margin: 0 auto;
   padding: 2rem 1.5rem 0;
 }
@@ -57,21 +57,46 @@
   margin-top: 1.5rem;
 }
 
-/* Opponent area */
-.opponentArea {
+/* Stadium (two sides) */
+.stadium {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 1rem;
   background: #fff;
   border: 2px solid #e5e7eb;
   border-radius: 1.25rem;
-  padding: 1rem;
+  padding: 1.5rem;
+  min-height: 16rem;
+}
+
+.opponentSide,
+.playerSide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.vsBadge {
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: #dc2626;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
 }
 
 .spriteBox {
   position: relative;
-  width: 6rem;
-  height: 6rem;
+  width: 8rem;
+  height: 8rem;
   flex-shrink: 0;
 }
 
@@ -79,9 +104,15 @@
   image-rendering: pixelated;
 }
 
+.playerSprite {
+  image-rendering: pixelated;
+  transform: scaleX(-1);
+}
+
 .infoBox {
-  flex: 1;
-  min-width: 0;
+  width: 100%;
+  max-width: 14rem;
+  text-align: center;
 }
 
 .pokemonName {
@@ -122,8 +153,8 @@
 /* Team dots */
 .teamIcons {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  flex-direction: row;
+  gap: 0.35rem;
   flex-shrink: 0;
 }
 
@@ -144,22 +175,11 @@
   background: #ef4444;
 }
 
-/* Player area */
-.playerArea {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  background: #fff;
-  border: 2px solid #e5e7eb;
-  border-radius: 1.25rem;
-  padding: 1rem;
-}
-
 /* Battle log */
 .battleLogWrap {
   background: #1f2937;
   border-radius: 1rem;
-  max-height: 10rem;
+  max-height: 8rem;
   overflow-y: auto;
   padding: 0.75rem;
 }

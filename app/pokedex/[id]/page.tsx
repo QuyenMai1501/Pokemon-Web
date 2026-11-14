@@ -21,6 +21,66 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+interface EvolutionEntry {
+  id: number;
+  name: string;
+}
+
+interface EvolutionForm extends EvolutionEntry {
+  category: "regional" | "mega" | "other";
+  label: string;
+}
+
+interface EvolutionChainNode {
+  species: { name: string; url: string };
+  evolves_to?: EvolutionChainNode[];
+}
+
+interface SpeciesVariety {
+  is_default: boolean;
+  pokemon: { name: string; url: string };
+}
+
+function getIdFromUrl(url: string): number {
+  const match = url.match(/\/(?:pokemon|pokemon-species)\/(\d+)\/?$/);
+  return match?.[1] ? Number(match[1]) : 0;
+}
+
+function getFormLabel(name: string): string {
+  return name
+    .split("-")
+    .slice(1)
+    .join(" ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase()) || "Dạng khác";
+}
+
+function getFormCategory(name: string): EvolutionForm["category"] {
+  if (["alola", "galar", "hisui", "paldea"].some((region) => name.endsWith(`-${region}`))) {
+    return "regional";
+  }
+  if (name.includes("-mega")) return "mega";
+  return "other";
+}
+
+function flattenEvolutionStages(chain: EvolutionChainNode): EvolutionEntry[][] {
+  const stages: EvolutionEntry[][] = [];
+
+  const visit = (node: EvolutionChainNode, depth: number) => {
+    const entry = {
+      id: getIdFromUrl(node.species.url),
+      name: node.species.name,
+    };
+    stages[depth] = stages[depth] || [];
+    if (!stages[depth].some((item) => item.name === entry.name)) {
+      stages[depth].push(entry);
+    }
+    for (const child of node.evolves_to || []) visit(child, depth + 1);
+  };
+
+  visit(chain, 0);
+  return stages;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
 
@@ -41,13 +101,13 @@ export default async function PokemonDetailPage({ params }: Props) {
   let pokemon: Pokemon;
   let species, evolutionData, damageRelations, abilitiesWithDesc;
   let stats, flavorText = "", genus = "";
-  const evolutionNames: string[] = [];
-  const evolutionIds: number[] = [];
+  let evolutionStages: EvolutionEntry[][] = [];
+  let evolutionForms: EvolutionForm[] = [];
 
   try {
     [pokemon, species] = await Promise.all([
       getPokemonDetailCached(id),
-      getPokemonSpecies(id),
+      getPokemonDetailCached(id).then((detail) => getPokemonSpecies(detail.species.url)),
     ]);
 
     [evolutionData, damageRelations] = await Promise.all([
@@ -99,30 +159,18 @@ export default async function PokemonDetailPage({ params }: Props) {
     }));
 
     if (evolutionData?.chain) {
-      let current = evolutionData.chain;
-
-      while (current) {
-        const name = current.species.name;
-        evolutionNames.push(name);
-
-        const speciesUrl = current.species.url;
-        const idMatch = speciesUrl.match(/\/pokemon\/(\d+)\//);
-
-        if (idMatch && idMatch[1]) {
-          evolutionIds.push(parseInt(idMatch[1]));
-        } else {
-          try {
-            const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
-            const data = await res.json();
-            evolutionIds.push(data.id);
-          } catch {
-            evolutionIds.push(0);
-          }
-        }
-
-        current = current.evolves_to?.[0];
-      }
+      evolutionStages = flattenEvolutionStages(evolutionData.chain);
     }
+
+    evolutionForms = (species.varieties as SpeciesVariety[] || [])
+      .filter((variety) => !variety.is_default)
+      .map((variety) => ({
+        id: getIdFromUrl(variety.pokemon.url),
+        name: variety.pokemon.name,
+        category: getFormCategory(variety.pokemon.name),
+        label: getFormLabel(variety.pokemon.name),
+      }))
+      .filter((form: EvolutionForm) => form.id > 0);
   } catch {
     return (
       <div className={styles.page}>
@@ -180,10 +228,10 @@ export default async function PokemonDetailPage({ params }: Props) {
               <p className={styles.description}>{flavorText}</p>
             </div>
 
-            {evolutionNames.length > 1 && (
+            {(evolutionStages.length > 1 || evolutionForms.length > 0) && (
               <EvolutionChain
-                evolutionNames={evolutionNames}
-                evolutionIds={evolutionIds}
+                stages={evolutionStages}
+                forms={evolutionForms}
               />
             )}
 

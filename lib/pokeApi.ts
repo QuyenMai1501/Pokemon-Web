@@ -5,6 +5,7 @@ const BASE_URL = 'https://pokeapi.co/api/v2';
 export interface Pokemon {
     id: number;
     name: string;
+    species: { name: string; url: string };
     sprites: {
         front_default: string;
         other: {
@@ -35,9 +36,13 @@ export async function getPokemonDetail(nameOrId: string | number): Promise<Pokem
 export const getPokemonDetailCached = cache(getPokemonDetail);
 
 export async function getPokemonSpecies(id: string | number) {
-    const res = await fetch(`${BASE_URL}/pokemon-species/${id}`, {
+    const speciesUrl = typeof id === "string" && id.startsWith("http")
+        ? id
+        : `${BASE_URL}/pokemon-species/${id}`;
+    const res = await fetch(speciesUrl, {
         next: { revalidate: 3600 }
     });
+    if (!res.ok) throw new Error('Species không tồn tại');
     return res.json();
 }
 

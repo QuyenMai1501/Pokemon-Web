@@ -40,12 +40,16 @@ export default function PokedexPage() {
   const [pokemonData, setPokemonData] = useState<Record<number, PokemonItem>>({});
   const [scrollCount, setScrollCount] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [batchError, setBatchError] = useState("");
+  const [batchLoading, setBatchLoading] = useState(false);
+  const [retryToken, setRetryToken] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedGen, setSelectedGen] = useState(0);
   const [selectedType, setSelectedType] = useState("All");
 
-  const visibleCount = selectedType !== "All" || debouncedSearch ? allPokemon.length : scrollCount;
+  const visibleCount = debouncedSearch ? allPokemon.length : scrollCount;
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadingRef = useRef(false);
@@ -57,18 +61,34 @@ export default function PokedexPage() {
   }, [searchTerm]);
 
   useEffect(() => {
+    let active = true;
+
     const load = async () => {
       setLoading(true);
+      setError("");
       const gen = generations[selectedGen];
-      const data = await getPokemonList(gen.limit, gen.offset);
-      setAllPokemon(data.results);
-      setScrollCount(PAGE_SIZE);
-      setPokemonData({});
-      fetchedRef.current = new Set();
-      setLoading(false);
+      try {
+        const data = await getPokemonList(gen.limit, gen.offset);
+        if (!Array.isArray(data?.results)) {
+          throw new Error("Invalid Pokédex response");
+        }
+        if (!active) return;
+        setAllPokemon(data.results);
+        setScrollCount(PAGE_SIZE);
+        setPokemonData({});
+        fetchedRef.current = new Set();
+      } catch {
+        if (active) setError("Không thể tải dữ liệu Pokédex.");
+      } finally {
+        if (active) setLoading(false);
+      }
     };
     load();
-  }, [selectedGen]);
+
+    return () => {
+      active = false;
+    };
+  }, [selectedGen, retryToken]);
 
   const displayedIds = useMemo(
     () => allPokemon.slice(0, visibleCount).map((p) => {
@@ -101,25 +121,40 @@ export default function PokedexPage() {
     idsToFetch.forEach((id) => fetchedRef.current.add(id));
 
     loadingRef.current = true;
-    fetch("/api/pokedex/batch", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids: idsToFetch }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
+    setBatchLoading(true);
+    setBatchError("");
+
+    const loadBatches = async () => {
+      const results: PokemonItem[] = [];
+      try {
+        for (let i = 0; i < idsToFetch.length; i += 60) {
+          const res = await fetch("/api/pokedex/batch", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ids: idsToFetch.slice(i, i + 60) }),
+          });
+          if (!res.ok) throw new Error("Batch request failed");
+          const data = await res.json();
+          if (!Array.isArray(data.results)) throw new Error("Invalid batch response");
+          results.push(...data.results);
+        }
+
         setPokemonData((prev) => {
           const next = { ...prev };
-          for (const item of data.results) {
-            next[item.id] = item;
-          }
+          for (const item of results) next[item.id] = item;
           return next;
         });
-      })
-      .finally(() => {
+      } catch {
+        idsToFetch.forEach((id) => fetchedRef.current.delete(id));
+        setBatchError("Không thể tải một số Pokémon. Vui lòng thử lại.");
+      } finally {
         loadingRef.current = false;
-      });
-  }, [effectiveIds]);
+        setBatchLoading(false);
+      }
+    };
+
+    loadBatches();
+  }, [effectiveIds, retryToken]);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -199,8 +234,23 @@ export default function PokedexPage() {
               <div key={i} className={styles.skeleton} />
             ))}
           </div>
+        ) : error ? (
+          <div className={styles.empty}>
+            <p>{error}</p>
+            <button type="button" onClick={() => setRetryToken((token) => token + 1)}>
+              Thử lại
+            </button>
+          </div>
         ) : (
           <>
+            {batchError && (
+              <div className={styles.empty}>
+                <p>{batchError}</p>
+                <button type="button" onClick={() => setRetryToken((token) => token + 1)}>
+                  Thử lại
+                </button>
+              </div>
+            )}
             <div className={styles.grid}>
               {filteredPokemon.map((pokemon) => {
                 const primaryType = pokemon.types[0]?.type.name;
@@ -232,6 +282,7 @@ export default function PokedexPage() {
               })}
             </div>
 
+            {batchLoading && <p className={styles.endText}>Đang tải Pokémon...</p>}
             {hasMore && (
               <div ref={sentinelRef} className={styles.sentinel}>
                 <div className={styles.loader} />

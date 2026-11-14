@@ -173,42 +173,89 @@ export default function BattlePage() {
         <h1 className={styles.title}>Đấu trường</h1>
 
         <div className={styles.battleField}>
-          <div className={styles.opponentArea}>
-            <div className={styles.spriteBox}>
-              <Image
-                src={opponentPokemon?.sprite || ""}
-                alt={opponentPokemon?.name || ""}
-                fill
-                sizes="128px"
-                style={{ objectFit: "contain" }}
-                className={styles.battleSprite}
-              />
-            </div>
-            <div className={styles.infoBox}>
-              <p className={styles.pokemonName}>{opponentPokemon?.name}</p>
-              <p className={styles.levelText}>Lv.{opponentPokemon?.level}</p>
-              <div className={styles.hpBarOuter}>
-                <div
-                  className={styles.hpBarInner}
-                  style={{
-                    width: opponentPokemon ? `${(opponentPokemon.currentHp / opponentPokemon.maxHp) * 100}%` : "0%",
-                    background: opponentPokemon && opponentPokemon.currentHp / opponentPokemon.maxHp <= 0.25
-                      ? "#ef4444" : "#22c55e",
-                  }}
+          <div className={styles.stadium}>
+            <div className={styles.opponentSide}>
+              <div className={styles.spriteBox}>
+                <Image
+                  src={opponentPokemon?.sprite || ""}
+                  alt={opponentPokemon?.name || ""}
+                  fill
+                  sizes="160px"
+                  style={{ objectFit: "contain" }}
+                  className={styles.battleSprite}
                 />
               </div>
-              <p className={styles.hpText}>
-                {opponentPokemon?.currentHp}/{opponentPokemon?.maxHp}
-              </p>
+              <div className={styles.infoBox}>
+                <p className={styles.pokemonName}>{opponentPokemon?.name}</p>
+                <p className={styles.levelText}>Lv.{opponentPokemon?.level}</p>
+                <div className={styles.hpBarOuter}>
+                  <div
+                    className={styles.hpBarInner}
+                    style={{
+                      width: opponentPokemon ? `${(opponentPokemon.currentHp / opponentPokemon.maxHp) * 100}%` : "0%",
+                      background: opponentPokemon && opponentPokemon.currentHp / opponentPokemon.maxHp <= 0.25
+                        ? "#ef4444" : "#22c55e",
+                    }}
+                  />
+                </div>
+                <p className={styles.hpText}>
+                  {opponentPokemon?.currentHp}/{opponentPokemon?.maxHp}
+                </p>
+              </div>
+              <div className={styles.teamIcons}>
+                {state.opponentTeam.map((p, i) => (
+                  <span
+                    key={i}
+                    className={`${styles.teamDot} ${i === state.opponentActive ? styles.teamDotActive : ""} ${p.currentHp <= 0 ? styles.teamDotFainted : ""}`}
+                    title={p.name}
+                  />
+                ))}
+              </div>
             </div>
-            <div className={styles.teamIcons}>
-              {state.opponentTeam.map((p, i) => (
-                <span
-                  key={i}
-                  className={`${styles.teamDot} ${i === state.opponentActive ? styles.teamDotActive : ""} ${p.currentHp <= 0 ? styles.teamDotFainted : ""}`}
-                  title={p.name}
+
+            {!state.winner && (
+              <div className={styles.vsBadge}>
+                <span>VS</span>
+              </div>
+            )}
+
+            <div className={styles.playerSide}>
+              <div className={styles.spriteBox}>
+                <Image
+                  src={playerPokemon?.sprite || ""}
+                  alt={playerPokemon?.name || ""}
+                  fill
+                  sizes="160px"
+                  style={{ objectFit: "contain" }}
+                  className={styles.playerSprite}
                 />
-              ))}
+              </div>
+              <div className={styles.infoBox}>
+                <p className={styles.pokemonName}>{playerPokemon?.name}</p>
+                <p className={styles.levelText}>Lv.{playerPokemon?.level}</p>
+                <div className={styles.hpBarOuter}>
+                  <div
+                    className={styles.hpBarInner}
+                    style={{
+                      width: playerPokemon ? `${(playerPokemon.currentHp / playerPokemon.maxHp) * 100}%` : "0%",
+                      background: playerPokemon && playerPokemon.currentHp / playerPokemon.maxHp <= 0.25
+                        ? "#ef4444" : "#22c55e",
+                    }}
+                  />
+                </div>
+                <p className={styles.hpText}>
+                  {playerPokemon?.currentHp}/{playerPokemon?.maxHp}
+                </p>
+              </div>
+              <div className={styles.teamIcons}>
+                {state.playerTeam.map((p, i) => (
+                  <span
+                    key={i}
+                    className={`${styles.teamDot} ${i === state.playerActive ? styles.teamDotActive : ""} ${p.currentHp <= 0 ? styles.teamDotFainted : ""}`}
+                    title={p.name}
+                  />
+                ))}
+              </div>
             </div>
           </div>
 
@@ -218,45 +265,6 @@ export default function BattlePage() {
                 <p key={i} className={styles.logLine}>{line}</p>
               ))}
               <div ref={logEndRef} />
-            </div>
-          </div>
-
-          <div className={styles.playerArea}>
-            <div className={styles.teamIcons}>
-              {state.playerTeam.map((p, i) => (
-                <span
-                  key={i}
-                  className={`${styles.teamDot} ${i === state.playerActive ? styles.teamDotActive : ""} ${p.currentHp <= 0 ? styles.teamDotFainted : ""}`}
-                  title={p.name}
-                />
-              ))}
-            </div>
-            <div className={styles.infoBox}>
-              <p className={styles.pokemonName}>{playerPokemon?.name}</p>
-              <p className={styles.levelText}>Lv.{playerPokemon?.level}</p>
-              <div className={styles.hpBarOuter}>
-                <div
-                  className={styles.hpBarInner}
-                  style={{
-                    width: playerPokemon ? `${(playerPokemon.currentHp / playerPokemon.maxHp) * 100}%` : "0%",
-                    background: playerPokemon && playerPokemon.currentHp / playerPokemon.maxHp <= 0.25
-                      ? "#ef4444" : "#22c55e",
-                  }}
-                />
-              </div>
-              <p className={styles.hpText}>
-                {playerPokemon?.currentHp}/{playerPokemon?.maxHp}
-              </p>
-            </div>
-            <div className={styles.spriteBox}>
-              <Image
-                src={playerPokemon?.sprite || ""}
-                alt={playerPokemon?.name || ""}
-                fill
-                sizes="128px"
-                style={{ objectFit: "contain" }}
-                className={styles.battleSprite}
-              />
             </div>
           </div>
 

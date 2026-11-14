@@ -24,38 +24,37 @@ interface MovesListProps {
 }
 
 async function fetchMoveBatch(entries: any[]): Promise<MoveDetail[]> {
-  const results: MoveDetail[] = [];
-  for (const m of entries) {
-    const detail = await getMoveDetail(m.move.url);
-    if (!detail) continue;
-    const versionDetail = m.version_group_details[0] || {};
-    const effectEntry =
-      detail.effect_entries?.find(
-        (e: any) => e.language.name === "vi",
-      ) ||
-      detail.effect_entries?.find(
-        (e: any) => e.language.name === "en",
-      );
-    const rawEffect = effectEntry?.short_effect || "";
-
-    results.push({
-      name: detail.name.replace(/-/g, " "),
-      type: detail.type.name,
-      power: detail.power,
-      accuracy: detail.accuracy,
-      pp: detail.pp,
-      damageClass: detail.damage_class?.name || "status",
-      effect: rawEffect || "Không có mô tả",
-      level: versionDetail.level_learned_at || 0,
-      method: versionDetail.move_learn_method?.name || "level-up",
-    });
-  }
-  return results;
+  const settled = await Promise.allSettled(
+    entries.map(async (m) => {
+      const detail = await getMoveDetail(m.move.url);
+      if (!detail) return null;
+      const versionDetail = m.version_group_details[0] || {};
+      const effectEntry =
+        detail.effect_entries?.find((e: any) => e.language.name === "vi") ||
+        detail.effect_entries?.find((e: any) => e.language.name === "en");
+      return {
+        name: detail.name.replace(/-/g, " "),
+        type: detail.type.name,
+        power: detail.power,
+        accuracy: detail.accuracy,
+        pp: detail.pp,
+        damageClass: detail.damage_class?.name || "status",
+        effect: effectEntry?.short_effect || "Không có mô tả",
+        level: versionDetail.level_learned_at || 0,
+        method: versionDetail.move_learn_method?.name || "level-up",
+      };
+    }),
+  );
+  return settled
+    .filter((result): result is PromiseFulfilledResult<MoveDetail | null> => result.status === "fulfilled")
+    .map((result) => result.value)
+    .filter((move): move is MoveDetail => move !== null);
 }
 
 export default function MovesList({ pokemonMoves }: MovesListProps) {
   const [allMoves, setAllMoves] = useState<MoveDetail[]>([]);
   const [loadedCount, setLoadedCount] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterMethod, setFilterMethod] = useState("all");
@@ -70,7 +69,7 @@ export default function MovesList({ pokemonMoves }: MovesListProps) {
     fetchMoveBatch(pokemonMoves.slice(0, BATCH_SIZE)).then((results) => {
       if (abortRef.current) return;
       setAllMoves(results);
-      setLoadedCount(results.length);
+      setLoadedCount(Math.min(BATCH_SIZE, pokemonMoves.length));
       setIsLoading(false);
     });
 
@@ -78,14 +77,20 @@ export default function MovesList({ pokemonMoves }: MovesListProps) {
   }, [pokemonMoves]);
 
   const loadMore = useCallback(async () => {
+    if (isLoadingMore) return;
     const start = loadedCount;
     const batch = pokemonMoves.slice(start, start + BATCH_SIZE);
     if (batch.length === 0) return;
 
-    const results = await fetchMoveBatch(batch);
-    setAllMoves((prev) => [...prev, ...results]);
-    setLoadedCount((prev) => prev + results.length);
-  }, [pokemonMoves, loadedCount]);
+    setIsLoadingMore(true);
+    try {
+      const results = await fetchMoveBatch(batch);
+      setAllMoves((prev) => [...prev, ...results]);
+      setLoadedCount((prev) => prev + batch.length);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [pokemonMoves, loadedCount, isLoadingMore]);
 
   const hasMore = loadedCount < pokemonMoves.length;
 
@@ -185,8 +190,8 @@ export default function MovesList({ pokemonMoves }: MovesListProps) {
 
       {hasMore && (
         <div className={styles.loadMoreWrap}>
-          <button onClick={loadMore} className={styles.loadMoreBtn}>
-            Xem thêm 10 chiêu thức
+          <button onClick={loadMore} className={styles.loadMoreBtn} disabled={isLoadingMore}>
+            {isLoadingMore ? "Đang tải..." : "Xem thêm 10 chiêu thức"}
           </button>
         </div>
       )}

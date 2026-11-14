@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPokemonDetail } from "@/lib/pokeApi";
 
 const CONCURRENCY = 15;
+const MAX_IDS_PER_REQUEST = 60;
 
 interface PokemonBatch {
   id: number;
@@ -25,13 +26,20 @@ async function withConcurrency<T, R>(
 }
 
 export async function POST(req: NextRequest) {
-  const { ids }: { ids: number[] } = await req.json();
+  const body: unknown = await req.json();
+  const ids = (body as { ids?: unknown })?.ids;
 
-  if (!Array.isArray(ids) || ids.length === 0) {
-    return NextResponse.json({ results: [] }, { status: 400 });
+  if (
+    !Array.isArray(ids) ||
+    ids.length === 0 ||
+    ids.length > MAX_IDS_PER_REQUEST ||
+    ids.some((id) => !Number.isInteger(id) || id < 1)
+  ) {
+    const status = Array.isArray(ids) && ids.length > MAX_IDS_PER_REQUEST ? 413 : 400;
+    return NextResponse.json({ results: [] }, { status });
   }
 
-  const results = await withConcurrency(ids, getPokemonDetail, CONCURRENCY);
+  const results = await withConcurrency(ids as number[], getPokemonDetail, CONCURRENCY);
 
   const data: PokemonBatch[] = results
     .filter((r) => r.status === "fulfilled")
