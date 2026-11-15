@@ -14,17 +14,31 @@ interface ItemData {
 export default function ItemsPage() {
   const [items, setItems] = useState<ItemData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   useEffect(() => {
+    let active = true;
     setLoading(true);
-    fetch("/api/items/list")
-      .then((res) => res.json())
-      .then((data) => {
-        setItems(data.results);
-        setLoading(false);
-      });
+    setError("");
+
+    (async () => {
+      try {
+        const res = await fetch("/api/items/list");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (active) setItems(Array.isArray(data.results) ? data.results : []);
+      } catch {
+        if (active) setError("Không thể tải danh sách vật phẩm. Vui lòng thử lại.");
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const categories = useMemo(() => {
@@ -78,6 +92,8 @@ export default function ItemsPage() {
               <div key={i} className={styles.skeleton} />
             ))}
           </div>
+        ) : error ? (
+          <p className={styles.empty}>{error}</p>
         ) : filteredItems.length === 0 ? (
           <p className={styles.empty}>Không tìm thấy vật phẩm nào.</p>
         ) : (

@@ -21,22 +21,55 @@ export async function PUT(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const { name, pokemon } = await req.json();
+  let body: { name?: unknown; pokemon?: unknown };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
 
-  await prisma.pokemonInstance.deleteMany({ where: { teamId: id } });
+  const { name, pokemon } = body;
 
+  if (!Array.isArray(pokemon) || pokemon.length > 6) {
+    return NextResponse.json({ error: "pokemon must be an array of at most 6" }, { status: 400 });
+  }
+
+  for (const p of pokemon) {
+    if (!p || typeof p !== "object") {
+      return NextResponse.json({ error: "Invalid pokemon entry" }, { status: 400 });
+    }
+    const entry = p as Record<string, unknown>;
+    if (typeof entry.pokemonId !== "number" || !Number.isInteger(entry.pokemonId) || entry.pokemonId < 1) {
+      return NextResponse.json({ error: "pokemonId must be a positive integer" }, { status: 400 });
+    }
+    if (entry.moves !== undefined && !Array.isArray(entry.moves)) {
+      return NextResponse.json({ error: "moves must be an array" }, { status: 400 });
+    }
+    if (Array.isArray(entry.moves) && entry.moves.some((m) => typeof m !== "string")) {
+      return NextResponse.json({ error: "moves must be strings" }, { status: 400 });
+    }
+  }
+
+  const teamName =
+    typeof name === "string" && name.trim().length > 0
+      ? name.trim().slice(0, 191)
+      : "Đội mới";
+
+  // Atomic: delete old instances + create new ones in a single nested update.
+  // If anything fails, the whole operation rolls back (no partial data loss).
   const updated = await prisma.team.update({
     where: { id },
     data: {
-      name,
+      name: teamName,
       pokemon: {
+        deleteMany: {},
         create: (pokemon as any[]).map((p, i) => ({
-          pokemonId: p.pokemonId ?? 0,
-          nickname: p.nickname ?? "",
-          ability: p.ability ?? "",
-          heldItem: p.heldItem ?? "",
-          moves: p.moves ?? [],
-          nature: p.nature ?? "",
+          pokemonId: p.pokemonId,
+          nickname: typeof p.nickname === "string" ? p.nickname.slice(0, 191) : "",
+          ability: typeof p.ability === "string" ? p.ability : "",
+          heldItem: typeof p.heldItem === "string" ? p.heldItem : "",
+          moves: Array.isArray(p.moves) ? p.moves : [],
+          nature: typeof p.nature === "string" ? p.nature : "",
           ivs: {},
           evs: {},
           order: i,

@@ -13,15 +13,33 @@ interface AbilityResult {
   effect: string;
 }
 
+const ALLOWED_PREFIX = "https://pokeapi.co/api/v2/ability/";
+const MAX_URLS = 50;
+
 export async function POST(req: NextRequest) {
-  const { abilityUrls }: { abilityUrls: string[] } = await req.json();
+  let body: { abilityUrls?: unknown };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  const { abilityUrls } = body;
 
   if (!Array.isArray(abilityUrls) || abilityUrls.length === 0) {
     return NextResponse.json({ results: [] }, { status: 400 });
   }
+  if (abilityUrls.length > MAX_URLS) {
+    return NextResponse.json({ error: `Too many URLs (max ${MAX_URLS})` }, { status: 413 });
+  }
+  if (abilityUrls.some((u) => typeof u !== "string" || !u.startsWith(ALLOWED_PREFIX))) {
+    return NextResponse.json({ error: "Invalid ability URL" }, { status: 400 });
+  }
+
+  const urls = abilityUrls as string[];
 
   const results = await Promise.allSettled(
-    abilityUrls.map(async (url) => {
+    urls.map(async (url) => {
       const res = await fetch(url, { next: { revalidate: 86400 } });
       if (!res.ok) return null;
       const data: AbilityDetail = await res.json();

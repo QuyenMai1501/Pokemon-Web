@@ -47,7 +47,9 @@ async function generateAiTeam(): Promise<BattlePokemon[]> {
   const listRes = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${AI_TEAM_POOL}&offset=0`, {
     next: { revalidate: 86400 },
   });
+  if (!listRes.ok) return [];
   const listData = await listRes.json();
+  if (!Array.isArray(listData?.results)) return [];
   const pool: { name: string; url: string }[] = listData.results;
 
   const shuffled = [...pool].sort(() => Math.random() - 0.5);
@@ -126,7 +128,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Team has no valid Pokemon" }, { status: 400 });
   }
 
+  const noMoves = playerTeam.find((p) => p.moves.length === 0);
+  if (noMoves) {
+    return NextResponse.json(
+      { error: `Pokemon "${noMoves.name}" không có chiêu thức nào. Hãy cập nhật đội trước khi đấu.` },
+      { status: 400 },
+    );
+  }
+
   const opponentTeam = await generateAiTeam();
+  if (opponentTeam.length === 0 || opponentTeam.some((p) => p.moves.length === 0)) {
+    return NextResponse.json(
+      { error: "Không thể tạo đội đối thủ. Vui lòng thử lại." },
+      { status: 502 },
+    );
+  }
 
   const battleId = crypto.randomUUID();
 

@@ -92,6 +92,9 @@ export function calculateDamage(
   const base = Math.floor(Math.floor((2 * attacker.level / 5 + 2) * move.power * attackStat / defenseStat) / 50 + 2);
 
   const typeEff = getTypeEffectiveness(move.type, defender.types);
+  if (typeEff === 0) {
+    return { damage: 0, effectiveness: TYPE_EFFECT_LABELS["0"] || "không hiệu quả" };
+  }
   const stab = attacker.types.includes(move.type) ? 1.5 : 1;
   const crit = Math.random() < 0.0625 ? 1.5 : 1;
 
@@ -104,6 +107,7 @@ export function calculateDamage(
 }
 
 export function pickAiMove(pokemon: BattlePokemon): number {
+  if (pokemon.moves.length === 0) return -1;
   const usableMoves = pokemon.moves
     .map((m, i) => ({ m, i }))
     .filter(({ m }) => m.power > 0 && m.currentPp > 0);
@@ -172,23 +176,35 @@ export function processTurn(state: BattleState, playerMoveIndex: number): Battle
   };
 
   const getOrderedMoves = () => {
+    const aiMoveIndex = pickAiMove(opponentPokemon);
+    const aiMove = aiMoveIndex >= 0 ? opponentPokemon.moves[aiMoveIndex] : null;
+    if (aiMove) aiMove.currentPp--;
+
+    const playerEntry = {
+      attacker: playerPokemon,
+      defender: opponentPokemon,
+      move: playerMove,
+      attackerName: playerPokemon.name,
+      defenderName: opponentPokemon.name,
+      isPlayer: true,
+      aiMoveIndex,
+    };
+    const aiEntry = aiMove
+      ? {
+          attacker: opponentPokemon,
+          defender: playerPokemon,
+          move: aiMove,
+          attackerName: opponentPokemon.name,
+          defenderName: playerPokemon.name,
+          isPlayer: false,
+          aiMoveIndex,
+        }
+      : null;
+
     if (playerFirst) {
-      const aiMoveIndex = pickAiMove(opponentPokemon);
-      const aiMove = opponentPokemon.moves[aiMoveIndex];
-      aiMove.currentPp--;
-      return [
-        { attacker: playerPokemon, defender: opponentPokemon, move: playerMove, attackerName: playerPokemon.name, defenderName: opponentPokemon.name, isPlayer: true, aiMoveIndex },
-        { attacker: opponentPokemon, defender: playerPokemon, move: aiMove, attackerName: opponentPokemon.name, defenderName: playerPokemon.name, isPlayer: false, aiMoveIndex },
-      ];
-    } else {
-      const aiMoveIndex = pickAiMove(opponentPokemon);
-      const aiMove = opponentPokemon.moves[aiMoveIndex];
-      aiMove.currentPp--;
-      return [
-        { attacker: opponentPokemon, defender: playerPokemon, move: aiMove, attackerName: opponentPokemon.name, defenderName: playerPokemon.name, isPlayer: false, aiMoveIndex },
-        { attacker: playerPokemon, defender: opponentPokemon, move: playerMove, attackerName: playerPokemon.name, defenderName: opponentPokemon.name, isPlayer: true, aiMoveIndex },
-      ];
+      return aiEntry ? [playerEntry, aiEntry] : [playerEntry];
     }
+    return aiEntry ? [aiEntry, playerEntry] : [];
   };
 
   const moves = getOrderedMoves();
@@ -197,6 +213,7 @@ export function processTurn(state: BattleState, playerMoveIndex: number): Battle
     const defender = m.isPlayer ? newState.opponentTeam[newState.opponentActive] : newState.playerTeam[newState.playerActive];
     const attacker = m.isPlayer ? newState.playerTeam[newState.playerActive] : newState.opponentTeam[newState.opponentActive];
     if (!defender || !attacker) break;
+    if (attacker.currentHp <= 0) break;
     if (defender.currentHp <= 0) break;
 
     executeMove(
