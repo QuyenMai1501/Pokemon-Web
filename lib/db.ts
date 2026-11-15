@@ -14,8 +14,9 @@ const adapter = new PrismaMariaDb({
   port: parseInt(dbUrl.port || '3306'),
   user: dbUrl.username,
   password: dbUrl.password,
-  database: dbUrl.pathname.slice(1), // bỏ dấu / đầu
+  database: dbUrl.pathname.slice(1),
   connectionLimit: 10,
+  allowPublicKeyRetrieval: true,
 })
 
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({

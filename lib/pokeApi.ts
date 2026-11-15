@@ -1,10 +1,11 @@
-import { relative } from "path";
+import { cache } from "react";
 
 const BASE_URL = 'https://pokeapi.co/api/v2';
 
 export interface Pokemon {
     id: number;
     name: string;
+    species: { name: string; url: string };
     sprites: {
         front_default: string;
         other: {
@@ -26,16 +27,22 @@ export async function getPokemonList(limit = 151, offset = 0) {
 
 export async function getPokemonDetail(nameOrId: string | number): Promise<Pokemon> {
     const res = await fetch(`${BASE_URL}/pokemon/${nameOrId}`, {
-        next: { revalidate: 3600 }
+        next: { revalidate: 86400 }
     });
     if (!res.ok) throw new Error('Pokemon không tồn tại');
     return res.json();
 }
 
+export const getPokemonDetailCached = cache(getPokemonDetail);
+
 export async function getPokemonSpecies(id: string | number) {
-    const res = await fetch(`${BASE_URL}/pokemon-species/${id}`, {
+    const speciesUrl = typeof id === "string" && id.startsWith("http")
+        ? id
+        : `${BASE_URL}/pokemon-species/${id}`;
+    const res = await fetch(speciesUrl, {
         next: { revalidate: 3600 }
     });
+    if (!res.ok) throw new Error('Species không tồn tại');
     return res.json();
 }
 
@@ -91,7 +98,19 @@ export async function getTypeDefense(types: string[]) {
 }
 
 export async function getAbilityDetail(abilityUrl: string) {
-    const res = await fetch(abilityUrl, {next: {revalidate: 3600}});
+    const res = await fetch(abilityUrl, {next: {revalidate: 86400}});
     if (!res.ok) return null;
     return res.json();
+}
+
+export const getAbilityDetailCached = cache(getAbilityDetail);
+
+export async function getItemDetail(url: string) {
+  try {
+    const res = await fetch(url, { next: { revalidate: 86400 } });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
 }

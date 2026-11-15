@@ -7,16 +7,22 @@ interface StatBarProps {
 }
 
 export default function StatBar({ name, value, max = 255 }: StatBarProps) {
+  const barColor =
+    value <= 50 ? "#dc2626" :
+    value <= 100 ? "#eab308" :
+    value <= 150 ? "#16a34a" :
+    "#2563eb";
+
   return (
     <div className={styles.row}>
       <div className={styles.label}>{name}</div>
       <div className={styles.track}>
         <div
           className={styles.fill}
-          style={{ width: `${(value / max) * 100}%` }}
+          style={{ width: `${(value / max) * 100}%`, backgroundColor: barColor }}
         />
       </div>
-      <div className={styles.value}>{value}</div>
+      <div className={styles.value} style={{ color: barColor }}>{value}</div>
     </div>
   );
 }

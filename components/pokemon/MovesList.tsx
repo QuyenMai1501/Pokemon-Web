@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import TypeBadge from "./TypeBadge";
 import { getMoveDetail } from "@/lib/pokeApi";
 import styles from "./MovesList.module.css";
+
+const BATCH_SIZE = 10;
 
 interface MoveDetail {
   name: string;
@@ -21,45 +23,79 @@ interface MovesListProps {
   pokemonMoves: any[];
 }
 
+async function fetchMoveBatch(entries: any[]): Promise<MoveDetail[]> {
+  const settled = await Promise.allSettled(
+    entries.map(async (m) => {
+      const detail = await getMoveDetail(m.move.url);
+      if (!detail) return null;
+      const versionDetail = m.version_group_details[0] || {};
+      const effectEntry =
+        detail.effect_entries?.find((e: any) => e.language.name === "vi") ||
+        detail.effect_entries?.find((e: any) => e.language.name === "en");
+      return {
+        name: detail.name.replace(/-/g, " "),
+        type: detail.type.name,
+        power: detail.power,
+        accuracy: detail.accuracy,
+        pp: detail.pp,
+        damageClass: detail.damage_class?.name || "status",
+        effect: effectEntry?.short_effect || "Không có mô tả",
+        level: versionDetail.level_learned_at || 0,
+        method: versionDetail.move_learn_method?.name || "level-up",
+      };
+    }),
+  );
+  return settled
+    .filter((result): result is PromiseFulfilledResult<MoveDetail | null> => result.status === "fulfilled")
+    .map((result) => result.value)
+    .filter((move): move is MoveDetail => move !== null);
+}
+
 export default function MovesList({ pokemonMoves }: MovesListProps) {
-  const [moves, setMoves] = useState<MoveDetail[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [allMoves, setAllMoves] = useState<MoveDetail[]>([]);
+  const [loadedCount, setLoadedCount] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterMethod, setFilterMethod] = useState("all");
+  const abortRef = useRef(false);
 
   useEffect(() => {
-    const fetchMoves = async () => {
-      setLoading(true);
-      const detailedMoves: MoveDetail[] = [];
+    abortRef.current = false;
+    setAllMoves([]);
+    setLoadedCount(0);
+    setIsLoading(true);
 
-      for (const m of pokemonMoves.slice(0, 80)) {
-        const detail = await getMoveDetail(m.move.url);
-        if (detail) {
-          const versionDetail = m.version_group_details[0] || {};
-          detailedMoves.push({
-            name: detail.name.replace(/-/g, " "),
-            type: detail.type.name,
-            power: detail.power,
-            accuracy: detail.accuracy,
-            pp: detail.pp,
-            damageClass: detail.damage_class?.name || "status",
-            effect:
-              detail.effect_entries?.[0]?.short_effect || "Không có mô tả",
-            level: versionDetail.level_learned_at || 0,
-            method: versionDetail.move_learn_method?.name || "level-up",
-          });
-        }
-      }
+    fetchMoveBatch(pokemonMoves.slice(0, BATCH_SIZE)).then((results) => {
+      if (abortRef.current) return;
+      setAllMoves(results);
+      setLoadedCount(Math.min(BATCH_SIZE, pokemonMoves.length));
+      setIsLoading(false);
+    });
 
-      setMoves(detailedMoves);
-      setLoading(false);
-    };
-
-    if (pokemonMoves.length > 0) fetchMoves();
+    return () => { abortRef.current = true; };
   }, [pokemonMoves]);
 
+  const loadMore = useCallback(async () => {
+    if (isLoadingMore) return;
+    const start = loadedCount;
+    const batch = pokemonMoves.slice(start, start + BATCH_SIZE);
+    if (batch.length === 0) return;
+
+    setIsLoadingMore(true);
+    try {
+      const results = await fetchMoveBatch(batch);
+      setAllMoves((prev) => [...prev, ...results]);
+      setLoadedCount((prev) => prev + batch.length);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [pokemonMoves, loadedCount, isLoadingMore]);
+
+  const hasMore = loadedCount < pokemonMoves.length;
+
   const filteredMoves = useMemo(() => {
-    return moves
+    return allMoves
       .filter((move) => {
         const matchSearch = move.name
           .toLowerCase()
@@ -73,9 +109,9 @@ export default function MovesList({ pokemonMoves }: MovesListProps) {
           return a.level - b.level;
         return a.name.localeCompare(b.name);
       });
-  }, [moves, searchTerm, filterMethod]);
+  }, [allMoves, searchTerm, filterMethod]);
 
-  if (loading) {
+  if (isLoading) {
     return <div className={styles.loading}>Đang tải danh sách chiêu thức...</div>;
   }
 
@@ -151,6 +187,14 @@ export default function MovesList({ pokemonMoves }: MovesListProps) {
           </tbody>
         </table>
       </div>
+
+      {hasMore && (
+        <div className={styles.loadMoreWrap}>
+          <button onClick={loadMore} className={styles.loadMoreBtn} disabled={isLoadingMore}>
+            {isLoadingMore ? "Đang tải..." : "Xem thêm 10 chiêu thức"}
+          </button>
+        </div>
+      )}
 
       {filteredMoves.length === 0 && (
         <p className={styles.empty}>Không tìm thấy chiêu thức nào phù hợp.</p>
